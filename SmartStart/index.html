@@ -1765,7 +1765,7 @@ const ssConfirm=(m,o)=>ssDialog(m,o), ssAlert=m=>ssDialog(m,{alert:true});
 const fmt=iso=>{ if(!iso) return ""; const d=new Date(iso+"T00:00:00"); return isNaN(d)?iso:d.toLocaleDateString("en-GB",{day:"numeric",month:"short"}) };
 const days=iso=>{ if(!iso) return null; return Math.round((TODAY-new Date(iso+"T00:00:00"))/864e5) };
 const isoD=d=>d.toISOString().slice(0,10);
-const APP_VERSION="2.27.3", APP_BUILD="2026-11-05";
+const APP_VERSION="2.27.4", APP_BUILD="2026-11-06";
 let OWNER=false;
 const DRY=params.get("dryrun")==="1", IMPDEMO=MODE==="local"&&params.has("importdemo");
 let LOCAL_RAW=null, TR=null, STM=null, STORE=null, SS=null;
@@ -2712,7 +2712,7 @@ document.addEventListener("click",async e=>{
   if(act==="clear"){ try{ await AMOD.signOut(AUTH); if(FSMOD&&DB) await FSMOD.terminate(DB).catch(()=>{}); const dbs=await (indexedDB.databases?indexedDB.databases():Promise.resolve([])); await Promise.all(dbs.map(d=>new Promise(r=>{const q=indexedDB.deleteDatabase(d.name);q.onsuccess=q.onerror=q.onblocked=r;}))); }catch(ex){} location.reload(); return; }
   if(act==="close"){ const m=$("#acct-msg"); if(!(await ssConfirm("Close this account?\n\nYour sign-in, records and files will be deleted. Export a backup first.",{ok:"Close account",cancel:"Keep account",danger:true}))) return;
     try{ m.textContent="Deleting your records and files…"; const F=await import("https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js"); await F.httpsCallable(F.getFunctions(APP,"asia-southeast1"),"stuartDeleteAccount")({}); try{sessionStorage.setItem("ss-closed","1")}catch(x){} await AMOD.deleteUser(AUTH.currentUser); m.textContent="Account closed. Your records and files were deleted."; }
-    catch(ex){ m.textContent=/requires-recent-login/.test(ex.code||"")?"For safety, sign out, sign in again, then try once more.":"Could not close the account ("+(ex.code||ex.message)+")."; } }
+    catch(ex){ m.textContent=/requires-recent-login/.test(ex.code||"")?"For safety, sign out, sign in again, then try once more.":/functions\/unavailable/.test(ex.code||"")?ex.message:"Could not close the account ("+(ex.code||ex.message)+")."; } }
 });
 let qT=null;
 document.addEventListener("input",e=>{ if(e.target.id==="d-q"){ F.dq=e.target.value; saveF(); clearTimeout(qT); qT=setTimeout(()=>{ const L=$("#dlst"); if(L) L.innerHTML=docsList(); },120); return; } if(e.target.id==="f-q"){F.q=e.target.value;saveF();clearTimeout(qT);qT=setTimeout(()=>refreshList(true),120)} });

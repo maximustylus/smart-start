@@ -14,8 +14,9 @@ function load() {
   swap("const db = admin.firestore();", "const db = global.__db;");
   swap('const KEY = defineSecret("ANTHROPIC_API_KEY");', 'const KEY = { value: () => "test" };');
   swap('const MAIL = defineSecret("MAIL_SMTP");', 'const MAIL = { value: () => global.__mail || "unset" };');
+  s = s.split("admin.storage().bucket()").join("global.__bucket");
   swap("async function claude(apiKey,", "async function claude(apiKey, o) { return global.__model(o); }\nasync function claude_unused(apiKey,");
-  s += "\nmodule.exports.__t = { HOUSE, wrap, stripIds, isPrivateIp, safeUrl, readable, rateCheck, RATE, reserve, CAP_USD, requireAllowed, claude_unused, mailBody, mailConfigured, mailAllowed, mailFail, mailUrl, MAIL_RATE, mergeDoc, applyFix, inspectBuild, enforceRules, rulesFor, cleanRule, unsourced, mergeAnswers, carryFixes, mergeKept, newQuestions, exports };\n";
+  s += "\nmodule.exports.__t = { HOUSE, wrap, stripIds, isPrivateIp, safeUrl, readable, rateCheck, RATE, reserve, CAP_USD, requireAllowed, claude_unused, mailBody, mailConfigured, mailAllowed, mailFail, mailUrl, MAIL_RATE, mergeDoc, applyFix, inspectBuild, enforceRules, rulesFor, cleanRule, unsourced, mergeAnswers, carryFixes, mergeKept, newQuestions, exports, inactiveAction, lastActive, mailStale, inactiveMail, closeAccountData, mailKey, OWNERS };\n";
   const m = new Module(SRC, module); m.filename = SRC; m.paths = Module._nodeModulePaths(path.dirname(SRC)); m._compile(s, SRC);
   return m.exports.__t;
 }
@@ -260,4 +261,44 @@ test("rebuild: the same answer is not stored twice, and a fix whose line has gon
 
 test("rebuild: the inspection also has room to finish first time", () => {
   assert.match(raw, /model: MODELS\.fast, maxTokens: 14000, hardMax: 20000, tool: \{ name: "inspection"/);
+});
+
+test("retention: an account closes only after a real notice, 30 days and 24 months of inactivity; activity cancels it (2.27.4)", () => {
+  const day = 864e5, now = Date.parse("2029-01-01T00:00:00Z"), ago = (d) => new Date(now - d * day).toUTCString(), a = T.inactiveAction;
+  const meta = (d) => ({ creationTime: ago(900), lastSignInTime: ago(d) });
+  assert.equal(a(meta(100), null, "a@b.c", now), "none", "an active account is left alone");
+  assert.equal(a(meta(699), null, "a@b.c", now), "none");
+  assert.equal(a(meta(700), null, "a@b.c", now), "notice");
+  assert.equal(a(meta(700), null, "", now), "none", "no email, no notice, so it can never close");
+  assert.equal(a(meta(730), null, "a@b.c", now), "notice", "24 months inactive still needs the notice first");
+  assert.equal(a(meta(735), now - 29 * day, "a@b.c", now), "none", "under 30 days since the notice");
+  assert.equal(a(meta(729), now - 30 * day, "a@b.c", now), "none", "under 24 months inactive");
+  assert.equal(a(meta(735), now - 30 * day, "a@b.c", now), "close");
+  assert.equal(a(meta(1), now - 30 * day, "a@b.c", now), "clear", "signing in after the notice cancels it");
+  assert.equal(a({ creationTime: ago(900), lastSignInTime: ago(800), lastRefreshTime: ago(2) }, null, "a@b.c", now), "none", "staying signed in counts as activity");
+  assert.equal(a(meta(800), now - 40 * day, T.OWNERS[0], now), "none", "the owner is never closed");
+  assert.equal(a({}, now - 40 * day, "a@b.c", now), "none", "unreadable dates do nothing");
+  assert.match(raw, /act === "notice" && mailConfigured/); assert.match(raw, /sendMail\(\{[^\n]*\n\s*await ref\.set\(\{ noticeAt: now \}\)/, "the notice is recorded only after it was sent");
+  assert.match(raw, /MAX_CLOSES_A_RUN = 20/);
+});
+
+test("retention: mail records go when a day old; notice email names the date and nothing private; logs hold counts", () => {
+  const now = 1e12; assert.equal(T.mailStale({ sent: [now - 1000] }, now), false); assert.equal(T.mailStale({ sent: [now - 864e5] }, now), true); assert.equal(T.mailStale({}, now), true);
+  const m = T.inactiveMail(Date.parse("2028-12-25T00:00:00Z")); assert.match(m.text, /25 December 2028/); assert.match(m.text, /smartstart-careers\.web\.app/); assert.doesNotMatch(m.text + m.html, /\+65/);
+  const job = raw.slice(raw.indexOf("exports.retentionDaily")); assert.doesNotMatch(job.split("console.").slice(1).join(""), /u\.email|u\.uid\b.*console/);
+});
+
+test("closing an account: every record goes, the mail record too, and a file failure is an error, not a false success (2.27.4)", async () => {
+  const del = [], store = {}; const saved = global.__db, sb = global.__bucket;
+  const ref = (p) => ({ path: p, async delete() { del.push(p); }, async get() { return { data: () => store[p] }; } });
+  global.__db.recursiveDelete = async (r) => del.push("recursive:" + r.path);
+  global.__db.collection = () => ({ where: () => ({ get: async () => ({ docs: [{ ref: ref("feedback/f1") }] }) }) });
+  const dbDoc = global.__db.doc; global.__db.doc = ref;
+  let filesFail = false; global.__bucket = { deleteFiles: async ({ prefix }) => { del.push("files:" + prefix); if (filesFail) throw new Error("x"); } };
+  await T.closeAccountData("u9", "A@B.c ");
+  assert.deepEqual(del.slice().sort(), ["feedback/f1", "files:users/u9/", "inactive/u9", "mail/" + T.mailKey("a@b.c"), "recursive:users/u9"].sort());
+  filesFail = true;
+  await assert.rejects(T.closeAccountData("u9", "a@b.c"), /x/);
+  await assert.rejects(T.exports.stuartDeleteAccount.run({ auth: { uid: "u9", token: { email: "a@b.c" } }, data: {} }), /could not be deleted/);
+  global.__db.doc = dbDoc; global.__bucket = sb; assert.equal(saved, global.__db);
 });

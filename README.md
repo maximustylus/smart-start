@@ -1,6 +1,8 @@
-# SMART START
+<img src="SmartStart/icons/smartstart-icon-light-192.png" alt="Smart Start logo" width="96">
 
-SMART START is a job-search tracker and coach, with Stuart, an artificial intelligence (AI) assistant built on Claude. It is live at https://smartstart-careers.web.app and is built by one developer working with Claude in Claude Code.
+# Smart Start
+
+Smart Start is a job-search tracker and coach, with Stuart, an artificial intelligence (AI) assistant built on Claude. It is live at https://smartstart-careers.web.app and is built by one developer working with Claude in Claude Code.
 
 This repository shows the code behind the app. It holds no user data: each user's records stay in their own account.
 
@@ -9,7 +11,7 @@ This repository shows the code behind the app. It holds no user data: each user'
 | Path | What it is |
 |---|---|
 | `SmartStart/` | The progressive web app: `index.html`, `stuart.js`, service worker, privacy notice, terms, icons, guide and preview media |
-| `functions/` | Cloud Functions for Stuart (`index.js`) and the guardrail tests (`test/`) |
+| `functions/` | Cloud Functions for Stuart (`index.js`): 14 APIs and a daily retention job, with the guardrail tests (`test/`) |
 | `firestore.rules`, `storage.rules` | Rules that let each user read and write only their own data |
 | `firebase.json`, `.firebaserc` | Firebase configuration |
 | `docs/Build_Stats.md` | How the first version was built, in numbers, as counted on 4 November 2026 |

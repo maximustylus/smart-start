@@ -6,6 +6,7 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { setGlobalOptions } = require("firebase-functions/v2");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const admin = require("firebase-admin");
 const { FieldValue, Timestamp } = require("firebase-admin/firestore"); // FieldValue is undefined in firebase-admin 13
 const Anthropic = require("@anthropic-ai/sdk");
@@ -1365,11 +1366,66 @@ exports.sendAuthEmail = onCall({ secrets: [MAIL], timeoutSeconds: 60 }, guard("s
 }));
 
 /* ---------- 10. Delete everything the user has (called before the account is closed) ---------- */
-exports.stuartDeleteAccount = onCall(guard("stuartDeleteAccount", async (req) => {
-  const uid = requireUser(req);
+const mailKey = (email) => crypto.createHash("sha256").update(String(email || "").trim().toLowerCase()).digest("hex");
+// 2.27.4: one path for every closure. Files come last and a failure there is an error, so the app never says "closed"
+// with files left behind; running it again finishes the job.
+async function closeAccountData(uid, email) {
   await db.recursiveDelete(db.doc(`users/${uid}`));
   const fb = await db.collection("feedback").where("uid", "==", uid).get(); // messages sent from Send feedback (2.16.0)
   await Promise.all(fb.docs.map((d) => d.ref.delete()));
-  await admin.storage().bucket().deleteFiles({ prefix: `users/${uid}/`, force: true }).catch(() => {});
+  await db.doc(`inactive/${uid}`).delete();
+  if (email) await db.doc(`mail/${mailKey(email)}`).delete();
+  await admin.storage().bucket().deleteFiles({ prefix: `users/${uid}/`, force: true });
+}
+exports.stuartDeleteAccount = onCall({ timeoutSeconds: 300 }, guard("stuartDeleteAccount", async (req) => {
+  const uid = requireUser(req);
+  try { await closeAccountData(uid, req.auth.token && req.auth.token.email); }
+  catch (e) { if (e instanceof HttpsError) throw e; console.error(JSON.stringify({ fn: "stuartDeleteAccount", fail: String((e && e.code) || (e && e.name) || "error").slice(0, 40) })); throw new HttpsError("unavailable", "Some of your data could not be deleted, so your account is still open. Try again in a few minutes."); }
   return { deleted: true };
 }));
+
+/* ---------- 11. Keeping the retention promises in the privacy notice (2.27.4): runs once a day ---------- */
+const DAY_MS = 864e5, INACTIVE_NOTICE_DAYS = 700, INACTIVE_CLOSE_DAYS = 730, NOTICE_WAIT_DAYS = 30, FEEDBACK_DAYS = 730, MAX_CLOSES_A_RUN = 20;
+// Activity is the latest of sign-up, sign-in and token refresh, because someone who stays signed in never "signs in" again.
+function lastActive(meta) { return Math.max(...[meta && meta.creationTime, meta && meta.lastSignInTime, meta && meta.lastRefreshTime].map((t) => Date.parse(t || "") || 0)); }
+// What to do with one account. An account closes only after a notice was really sent, 30 days have passed since it, it has
+// been inactive for 24 months, and nothing has happened since the notice. Unreadable dates or an owner: nothing, ever.
+function inactiveAction(meta, noticeAt, email, now = Date.now()) {
+  const last = lastActive(meta);
+  if (!last || OWNERS.includes(String(email || "").toLowerCase())) return "none";
+  if (noticeAt && last > noticeAt) return "clear";
+  const age = (now - last) / DAY_MS;
+  if (noticeAt) return age >= INACTIVE_CLOSE_DAYS && (now - noticeAt) / DAY_MS >= NOTICE_WAIT_DAYS ? "close" : "none";
+  return age >= INACTIVE_NOTICE_DAYS && email ? "notice" : "none";
+}
+const mailStale = (d, now = Date.now()) => !(Array.isArray(d && d.sent) && d.sent.some((t) => now - t < DAY_MS));
+function inactiveMail(closeOn) {
+  const when = new Date(closeOn).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Singapore" });
+  const subject = "Your SMART START account will close unless you sign in";
+  const text = `You have not used SMART START for almost two years. As the privacy notice says, inactive accounts are closed and their data deleted.\n\nSign in before ${when} to keep your account: ${APP_URL}\n\nIf you do nothing, your account, records and files will be deleted on or after that date. You can export a backup after signing in.\n\nSMART START, developed by Muhammad Alif.\n`;
+  const html = `<p>You have not used SMART START for almost two years. As the privacy notice says, inactive accounts are closed and their data deleted.</p><p><a href="${esc(APP_URL)}">Sign in</a> before <b>${esc(when)}</b> to keep your account.</p><p>If you do nothing, your account, records and files will be deleted on or after that date. You can export a backup after signing in.</p><p>SMART START, developed by Muhammad Alif.</p>`;
+  return { subject, text, html };
+}
+exports.retentionDaily = onSchedule({ schedule: "every day 03:30", timeZone: "Asia/Singapore", secrets: [MAIL], timeoutSeconds: 540 }, async () => {
+  const now = Date.now(), n = { notices: 0, closed: 0, cleared: 0, feedback: 0, mail: 0, failed: 0 };
+  let page;
+  do {
+    page = await admin.auth().listUsers(1000, page && page.pageToken);
+    for (const u of page.users) {
+      const ref = db.doc(`inactive/${u.uid}`), rec = (await ref.get()).data(), act = inactiveAction(u.metadata, rec && rec.noticeAt, u.email, now);
+      try {
+        if (act === "clear") { await ref.delete(); n.cleared++; }
+        else if (act === "notice" && mailConfigured(MAIL.value())) { // no working mail, no notice, and so no closure
+          const m = inactiveMail(now + NOTICE_WAIT_DAYS * DAY_MS);
+          await nodemailer.createTransport(mailUrl(MAIL.value())).sendMail({ from: MAIL_FROM, to: u.email, subject: m.subject, text: m.text, html: m.html });
+          await ref.set({ noticeAt: now }); n.notices++;
+        } else if (act === "close" && n.closed < MAX_CLOSES_A_RUN) { await closeAccountData(u.uid, u.email); await admin.auth().deleteUser(u.uid); n.closed++; }
+      } catch (e) { n.failed++; console.error(JSON.stringify({ fn: "retentionDaily", act, fail: String((e && e.code) || "error").slice(0, 40) })); } // never the address; tried again tomorrow
+    }
+  } while (page.pageToken);
+  const old = await db.collection("feedback").where("at", "<", Timestamp.fromMillis(now - FEEDBACK_DAYS * DAY_MS)).limit(400).get();
+  await Promise.all(old.docs.map((d) => d.ref.delete())); n.feedback = old.size;
+  const mail = await db.collection("mail").limit(1000).get(), stale = mail.docs.filter((d) => mailStale(d.data(), now));
+  await Promise.all(stale.map((d) => d.ref.delete())); n.mail = stale.length;
+  console.log(JSON.stringify({ fn: "retentionDaily", ...n })); // counts only
+});

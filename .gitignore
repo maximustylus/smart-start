@@ -1,0 +1,4 @@
+.DS_Store
+.firebase/
+functions/node_modules/
+SmartStart/data.json

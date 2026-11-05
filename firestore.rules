@@ -1,0 +1,66 @@
+rules_version = '2';
+// SMART START.
+// 1. The published tracker document (smartstart/current): the owner's accounts only.
+// 2. Each user's own space (users/{uid}/...): that user only, path by path. The budget
+//    ledger (meta/*) is written only by Stuart's functions (Admin SDK), never by the app,
+//    so the monthly cap cannot be reset from the client.
+// Everything else is closed.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Email addresses are unique across Firebase Authentication accounts, so the
+    // email alone identifies the owner. Both the email/password account and the
+    // Google account are listed. (A console-created account is not marked
+    // "email verified", so that flag is not checked.)
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'muhammad.alif@me.com'
+        ];
+    }
+    function isSelf(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    match /smartstart/{doc} {
+      allow read, write: if isOwner();
+    }
+    match /users/{uid} {
+      allow read: if isSelf(uid);
+      match /profile/{doc} { allow read, write: if isSelf(uid); }
+      match /plan/{doc} { allow read, write: if isSelf(uid); }
+      match /jobs/{job} {
+        allow read, write: if isSelf(uid);
+        match /chat/{msg} { allow read, delete: if isSelf(uid); allow create, update: if false; } // the owner may delete a job with its chat (2.15.0)
+      }
+      match /meta/{doc} { allow read: if isSelf(uid); allow write: if false; }
+      // The tracker, from 31 October 2026 (see the data model): the user's own
+      // applications with stage history, document index, deadlines and import note.
+      match /applications/{appId} { allow read, write: if isSelf(uid); }
+      match /documents/{docId} { allow read, write: if isSelf(uid); }
+      match /deadlines/{id} { allow read, write: if isSelf(uid); }
+      match /tracker/{doc} { allow read, write: if isSelf(uid); }
+      // Records archive (2.26.0): the user's own notes and saved advertisements, one document per file.
+      match /records/{id} { allow read, write: if isSelf(uid); }
+      // Stuart's CV builder (2.10.0): the master CV, and the documents built for each job
+      // (written by the stuartTailor function; the user may edit the cover letter text).
+      match /cv/{doc} { allow read, write: if isSelf(uid); }
+      match /builds/{jobId} { allow read, write: if isSelf(uid); }
+    }
+    // Feedback (2.16.0): a signed-in user may send a message in their own name; nobody reads it
+    // from the app (the owner reads it in the console). Closing the account deletes it (stuartDeleteAccount).
+    match /feedback/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'kind', 'text', 'at', 'app', 'device'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.get('email', '')
+        && request.resource.data.kind in ['broke', 'idea', 'question']
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 4000
+        && request.resource.data.at == request.time
+        && (!('app' in request.resource.data) || (request.resource.data.app is string && request.resource.data.app.size() <= 40))
+        && (!('device' in request.resource.data) || (request.resource.data.device is string && request.resource.data.device.size() <= 200));
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

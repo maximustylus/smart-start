@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Stuart, the SMART START assistant</title>
+  <defs>
+    <linearGradient id="st-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3f8f4"/><stop offset="1" stop-color="#d9eadf"/></linearGradient>
+    <linearGradient id="st-suit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2b2f"/><stop offset="1" stop-color="#0e0e11"/></linearGradient>
+    <linearGradient id="st-tie" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient>
+    <clipPath id="st-circle"><circle cx="128" cy="128" r="120"/></clipPath>
+  </defs>
+  <circle cx="128" cy="128" r="124" fill="url(#st-bg)"/>
+  <circle cx="128" cy="128" r="120" fill="none" stroke="#06432c" stroke-opacity=".18" stroke-width="2"/>
+  <g clip-path="url(#st-circle)">
+    <!-- shirt: a white V from the collar line down -->
+    <path d="M86 92 L128 190 L170 92 Z" fill="#ffffff"/>
+    <!-- jacket: two lapels meeting low, shoulders beyond the circle -->
+    <path d="M20 104 C50 96 72 90 86 92 L128 190 L112 258 L8 258 Z" fill="url(#st-suit)"/>
+    <path d="M236 104 C206 96 184 90 170 92 L128 190 L144 258 L248 258 Z" fill="url(#st-suit)"/>
+    <!-- lapel highlights -->
+    <path d="M86 92 L128 190 L104 120 Z" fill="#ffffff" fill-opacity=".08"/>
+    <path d="M170 92 L128 190 L152 120 Z" fill="#ffffff" fill-opacity=".08"/>
+    <!-- collar points -->
+    <path d="M110 92 L128 118 L146 92 L136 88 L128 100 L120 88 Z" fill="#f1f5f9"/>
+    <!-- tie: knot and blade -->
+    <path d="M120 100 L136 100 L130 112 L126 112 Z" fill="url(#st-tie)"/>
+    <path d="M126 112 L130 112 L138 160 L128 174 L118 160 Z" fill="url(#st-tie)"/>
+    <path d="M128 112 L134 150 L128 170 L122 150 Z" fill="#ffffff" fill-opacity=".10"/>
+    <!-- pocket square, a touch of brand amber -->
+    <path d="M184 150 L204 146 L202 158 L188 160 Z" fill="#f28c1c"/>
+  </g>
+</svg>

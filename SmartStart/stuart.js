@@ -258,7 +258,7 @@ function renderDemo() {
       { id: "r2", title: "Operations Manager", org: "Harbourside Clinics", location: "Singapore", start: "2017", end: "2020", bullets: [{ text: "Opened two new clinics on time and within budget.", src: "cv" }] }],
     education: [{ text: "MSc Health Services Management, Example University, 2016" }], skills: ["Operations", "Service design", "Data dashboards", "Stakeholder management"], certifications: [{ text: "Lean Six Sigma Green Belt" }], awards: [], publications: [], referees: [] };
   if (!state.facts) state.facts = { items: [{ id: "f1", q: "Can you start before 1 January 2027?", a: "Yes, from 1 December 2026.", at: "2026-11-10", org: "Example Logistics Group" }] };
-  if (!state.rules) state.rules = { list: [{ id: "d1", type: "leave", term: "Side project", unless: true, text: "Leave out the side project from every CV, resume and letter" }, { id: "d2", type: "word", use: "co-leads the referral programme", avoid: "leads the referral programme", text: "\"Co-leads\" the referral programme, never \"leads\"" }, { id: "d4", type: "date", date: "2026-12-31", text: "I leave Meridian Care Group on 31 Dec 2026. From 1 Jan 2027, write that role in the past tense" }, { id: "d3", type: "ask", term: "Lean Six Sigma", text: "Lean Six Sigma Green Belt: ask before claiming it" }] };
+  if (!state.rules) state.rules = { list: [{ id: "d1", type: "leave", term: "Volunteer coaching", unless: true, text: "Leave out the volunteer coaching from every CV, resume and letter" }, { id: "d2", type: "word", use: "organised", avoid: "organized", text: "Write \"organised\", never \"organized\"" }, { id: "d4", type: "date", date: "2027-01-20", text: "I sit the Japanese language exam on 20 Jan 2027. Until then, call it in progress" }, { id: "d3", type: "ask", term: "Lean Six Sigma", text: "Lean Six Sigma Green Belt: ask before claiming it" }] };
   state.jobs[0].facts.organisation = "Northwind Health"; state.jobs[0].facts.role = "Director, Strategy and Transformation"; state.jobs[0].facts.apply = { method: "email", email: "careers@northwind.example" };
   render();
 }
@@ -570,7 +570,7 @@ function rulesCard() {
   const L = rulesList();
   const grp = RG.map(([h, ts]) => { const xs = L.filter((r) => ts.includes(r.type)); return xs.length ? `<h3 class="ru-g">${h}</h3>` + xs.map((r) => `<div class="ru-r">${ruleTag(r.type)}<p>${esc(ruleText(r))}${r.unless ? `<span>Unless you turn it on for one job</span>` : ""}</p><button type="button" class="ru-x" data-stu="ru-del" data-id="${esc(r.id)}" aria-label="Remove this rule">${ICO.x}</button></div>`).join("") : ""; }).join("");
   return `<section class="card sx-c ru"><h2 class="sx-k">Your rules${L.length ? " · " + L.length : ""}</h2><p class="sx-sp sm">Stuart follows these in every CV, resume and letter, and checks every document against them. Only you can change them.</p>
-    ${grp || `<p class="sx-sp">No rules yet. Say one in your own words, such as "Leave out my side project unless I ask".</p>`}<button type="button" class="btn sx-b sx-full" data-stu="ru-open">Add a rule</button></section>`;
+    ${grp || `<p class="sx-sp">No rules yet. Say one in your own words, such as "Leave out my volunteer coaching unless I ask".</p>`}<button type="button" class="btn sx-b sx-full" data-stu="ru-open">Add a rule</button></section>`;
 }
 /* 2.44.0 Check for repeats: Stuart lists lines that tell the same thing twice and lines that disagree. The user picks
    what goes; the changes land in the draft, so nothing is saved until Save. */
@@ -635,7 +635,7 @@ function rulesSheet() {
     conf = k ? sayS(`<p>${esc(k.question)}</p>`) + `<div class="ru-cf"><span>${esc(k.a.where)}</span>"${esc(k.a.text)}"</div><div class="ru-cf"><span>${esc(k.b.where)}</span>"${esc(k.b.text)}"</div>
       <div class="ru-two">${k.options.map((o, i) => `<button type="button" class="btn ${i ? "btn--ghost " : ""}sx-b" data-stu="ru-pick" data-k="${esc(k.id)}" data-o="${i}">${esc(o.label)}</button>`).join("")}</div><p class="sx-sp sm sx-c2">Your answer becomes a rule and corrects your master CV.</p>`
       : `<p class="sx-sp">Nothing else in your master CV (v${esc(c.version || "1.0")}) disagrees with itself.</p>`;
-  } else conf = (c.experience || []).length ? `<p class="sx-sp sm">Stuart can read your CV for places that say two different things, such as "leads" in one place and "co-leads" in another.</p><button type="button" class="btn btn--ghost sx-b sx-full" data-stu="ru-scan"${S.busy ? " disabled" : ""}>Check my CV for things that disagree</button>` : "";
+  } else conf = (c.experience || []).length ? `<p class="sx-sp sm">Stuart can read your CV for places that say two different things, such as 2019 in one place and 2018 in another.</p><button type="button" class="btn btn--ghost sx-b sx-full" data-stu="ru-scan"${S.busy ? " disabled" : ""}>Check my CV for things that disagree</button>` : "";
   return `<div class="sx-rv" role="dialog" aria-modal="true" aria-label="Add a rule"><div class="sx-rvb card"><div class="sx-rvh"><b>Add a rule</b><button type="button" class="sx-pvx" data-stu="ru-x" aria-label="Close">${ICO.x}</button></div>
     <p class="sx-sp">Say it in your own words. Stuart reads it back before saving.</p>
     <textarea id="ru-text" class="ru-ta" rows="3" maxlength="500" placeholder="For example: never call me a generalist"${rd ? " readonly" : ""}>${esc(S.text || "")}</textarea>${back}${busy}${err}
@@ -859,8 +859,8 @@ async function runInspect(jobId, data, label) {
   state.inspBusy = ""; render();
 }
 // preview only: a scripted inspection on the sample build, two fixes in round 1, a pass in round 2
-const demoClaims = (ok) => ok ? [{ quote: "I have led clinic operations since 2017", where: "Paragraph 1", status: "holds", source: "Harbourside Clinics, 2017 to 2020" }, { quote: "I co-lead the referral programme", where: "Paragraph 2", status: "holds", source: "Your rule" }, { quote: "cut appointment no-shows from 18% to 11% in 2024", where: "Paragraph 2", status: "holds", source: "Head of Operations, bullet 1" }]
-  : [{ quote: "I have led operations for over ten years", where: "Paragraph 1", status: "overclaim", reason: "Your CV shows operations roles from 2017, not ten years." }, { quote: "I lead the referral programme", where: "Paragraph 2", status: "rule", reason: "Your rule: \"co-leads\" the referral programme, never \"leads\"." },
+const demoClaims = (ok) => ok ? [{ quote: "I have led clinic operations since 2017", where: "Paragraph 1", status: "holds", source: "Harbourside Clinics, 2017 to 2020" }, { quote: "I organised the opening of two new clinics", where: "Paragraph 2", status: "holds", source: "Your rule" }, { quote: "cut appointment no-shows from 18% to 11% in 2024", where: "Paragraph 2", status: "holds", source: "Head of Operations, bullet 1" }]
+  : [{ quote: "I have led operations for over ten years", where: "Paragraph 1", status: "overclaim", reason: "Your CV shows operations roles from 2017, not ten years." }, { quote: "I organized the opening of two new clinics", where: "Paragraph 2", status: "rule", reason: "Your rule: write \"organised\", never \"organized\"." },
     { quote: "I hold a Lean Six Sigma Green Belt", where: "Paragraph 3", status: "ask", reason: "You asked to be asked first." }, { quote: "cut appointment no-shows from 18% to 11% in 2024", where: "Paragraph 2", status: "holds", source: "Head of Operations, bullet 1" }];
 function demoInspect(b, apply) {
   const r1 = (b.cv.experience || [])[0] || {}, rr = (b.resume.experience || [])[0] || {};

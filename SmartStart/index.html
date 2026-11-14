@@ -1930,7 +1930,7 @@ const ssConfirm=(m,o)=>ssDialog(m,o), ssAlert=m=>ssDialog(m,{alert:true});
 const fmt=iso=>{ if(!iso) return ""; const d=new Date(iso+"T00:00:00"); return isNaN(d)?iso:d.toLocaleDateString("en-GB",{day:"numeric",month:"short"}) };
 const days=iso=>{ if(!iso) return null; return Math.round((TODAY-new Date(iso+"T00:00:00"))/864e5) };
 const isoD=d=>d.toISOString().slice(0,10);
-const APP_VERSION="2.47.5", APP_BUILD="2026-11-14";
+const APP_VERSION="2.47.6", APP_BUILD="2026-11-14";
 let OWNER=false;
 const DRY=params.get("dryrun")==="1", IMPDEMO=MODE==="local"&&params.has("importdemo");
 let LOCAL_RAW=null, TR=null, STM=null, STORE=null, SS=null;
@@ -2849,7 +2849,7 @@ function gdGoThere(){ const g=GUIDE[GD.i]; if(!g) return; const [v,extra]=GUIDE_
 const guideSeenKey=()=>"ss-guide-seen-"+((USER&&USER.uid)||"local");
 function guideFirstRun(){ if(MODE==="local") return false; try{ if(localStorage.getItem(guideSeenKey())) return false; localStorage.setItem(guideSeenKey(),"1"); }catch(e){ return false; } return true; }
 const guideDesk=()=>matchMedia("(min-width:1024px)").matches;
-const gImg=(k,desk)=>"guide/"+(isDark()?"dark":"light")+"/"+(desk?"d_":"m_")+k+".jpg?v=4";
+const gImg=(k,desk)=>"guide/"+(isDark()?"dark":"light")+"/"+(desk?"d_":"m_")+k+".jpg?v=5";
 function renderGuide(){ const desk=guideDesk();
   return '<div class="gd"><div class="ihead"><h1>Guide</h1></div><p class="gd__sub">How SMART START works, one screen at a time. Tap a topic to see it on '+(desk?'a laptop':'your phone')+'.</p>'
     +'<div class="gd__grid">'+GUIDE.map((g,i)=>'<button type="button" class="gd__c" data-act="gd-open" data-i="'+i+'"><span class="gd__th'+(desk?' d':'')+'"><img src="'+gImg(g[0],desk)+'" alt="" loading="lazy"></span><span class="gd__n">'+(i+1)+'</span><b>'+esc(g[1])+'</b><span class="gd__t">'+esc(g[2].split(". ")[0].replace(/\.$/,""))+'.</span></button>').join("")+'</div></div>'; }

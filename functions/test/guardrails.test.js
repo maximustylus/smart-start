@@ -204,13 +204,21 @@ test("a failed AI call neither logs nor returns the service's own wording", () =
 /* 2.27.2: the request Stuart really sends, against a local stand-in for the AI service */
 test("speed: effort, cached data, timing logs with counts only, and a budget that counts cached tokens", async () => {
   const http = require("http"); let body = null;
-  const srv = http.createServer((q, res) => { let d = ""; q.on("data", (c) => (d += c)); q.on("end", () => { body = JSON.parse(d); res.setHeader("content-type", "application/json");
-    res.end(JSON.stringify({ id: "m", type: "message", role: "assistant", model: body.model, stop_reason: "tool_use", content: [{ type: "tool_use", id: "t", name: "x", input: { say: "ok" } }], usage: { input_tokens: 100, cache_read_input_tokens: 8000, cache_creation_input_tokens: 0, output_tokens: 50 } })); }); });
+  // 2.48.0: the call is streamed, so the stand-in answers with server-sent events, as the AI service does
+  const srv = http.createServer((q, res) => { let d = ""; q.on("data", (c) => (d += c)); q.on("end", () => { body = JSON.parse(d); res.setHeader("content-type", "text/event-stream");
+    const ev = (type, data) => `event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`;
+    res.end(ev("message_start", { message: { id: "m", type: "message", role: "assistant", model: body.model, content: [], stop_reason: null, usage: { input_tokens: 100, cache_read_input_tokens: 8000, cache_creation_input_tokens: 0, output_tokens: 1 } } })
+      + ev("content_block_start", { index: 0, content_block: { type: "tool_use", id: "t", name: "x", input: {} } })
+      + ev("content_block_delta", { index: 0, delta: { type: "input_json_delta", partial_json: "{\"say\":\"ok\"}" } })
+      + ev("content_block_stop", { index: 0 })
+      + ev("message_delta", { delta: { stop_reason: "tool_use" }, usage: { output_tokens: 50 } })
+      + ev("message_stop", {})); }); });
   await new Promise((r) => srv.listen(0, "127.0.0.1", r)); process.env.ANTHROPIC_BASE_URL = "http://127.0.0.1:" + srv.address().port;
   const logs = [], orig = console.log; console.log = (x) => logs.push(String(x));
   try {
     const out = await T.claude_unused("k", { model: "claude-sonnet-5-5", effort: "medium", tool: { name: "x", schema: { type: "object", properties: {} } }, messages: [{ role: "user", content: [{ type: "text", text: "SECRET CV TEXT", cache_control: { type: "ephemeral" } }, { type: "text", text: "question" }] }] });
     assert.equal(body.output_config.effort, "medium"); assert.equal(body.tool_choice.type, "auto"); assert.equal(body.messages[0].content[0].cache_control.type, "ephemeral");
+    assert.equal(body.stream, true, "2.48.0: every call is streamed");
     assert.deepEqual(JSON.parse(out.text), { say: "ok" }); assert.equal(out.usage.cache_read_input_tokens, 8000);
   } finally { console.log = orig; srv.close(); delete process.env.ANTHROPIC_BASE_URL; }
   const line = logs.find((l) => /"fn":"claude"/.test(l)); assert.ok(line, "a timing line is logged"); const j = JSON.parse(line);
@@ -218,6 +226,14 @@ test("speed: effort, cached data, timing logs with counts only, and a budget tha
   const db = global.__db.store, mk = new Date().toISOString().slice(0, 7); db["users/u5/meta/budget"] = { month: mk, usd: 0 };
   const b = await T.reserve("u5", "coach"); await b.charge("claude-sonnet-5-5", { input_tokens: 0, cache_creation_input_tokens: 1000000, cache_read_input_tokens: 1000000, output_tokens: 0 }); await b.release();
   assert.ok(Math.abs(db["users/u5/meta/budget"].usd - (2 * 1.25 + 2 * 0.1)) < 1e-9, "cached tokens count against the cap");
+});
+test("2.48.0: the fit check, build and inspection start with room enough, so answers are not cut off and paid for twice", () => {
+  assert.match(raw, /model: MODELS\.deep, maxTokens: 16000, hardMax: 32000, messages/, "fit check");
+  assert.match(raw, /model: MODELS\.deep, maxTokens: 32000, hardMax: 48000, messages/, "build");
+  assert.match(raw, /model: MODELS\.fast, maxTokens: 24000, hardMax: 40000, tool: \{ name: "inspection"/, "inspection");
+  assert.match(raw, /client\.messages\.stream\(\{[^\n]*\}\)\.finalMessage\(\)/, "streamed");
+  assert.match(raw, /\? 32000 : 6000, hardMax: 48000, messages/, "make a document");
+  assert.doesNotMatch(raw, /hardMax: \d+,\s*hardMax/, "one ceiling per call");
 });
 test("speed: the coach and chat calls set an effort; fit checks and documents keep the model's default", () => {
   assert.match(raw, /effort: "medium", maxTokens: 2000, tool: COACH_REPLY/); assert.match(raw, /effort: "low", maxTokens: 1500, messages, system: `Context/);
@@ -237,7 +253,7 @@ test("rebuild: answers build up, a question is asked once, and accepted fixes st
     await T.exports.stuartTailor.run({ auth: { uid, token: { email: "a@b.c", email_verified: true } }, data: { jobId: "j1", answers } }); return db[K]; };
   const b1 = await run("", ["Q one?", "Q two?", "Q three?", "Q four?", "Q five?"]);
   assert.equal(b1.questions.length, 4, "a first build asks at most four");
-  assert.equal(opts[0].maxTokens, 16000, "the build starts with room to finish");
+  assert.equal(opts[0].maxTokens, 32000, "the build starts with room to finish (2.48.0)");
   b1.kept = T.mergeKept([], [{ doc: "cv", op: "move", roleId: "r1", from: 2, to: 1, text: "Ran three community programmes a year." }]);
   const b2 = await run("[Question: Q one?]\nAnswer one, 2019", ["q ONE", "Q six?", "Q seven?", "Q eight?"]);
   assert.deepEqual(b2.questions, ["Q six?", "Q seven?"], "a rebuild never repeats a question and asks at most two");
@@ -262,7 +278,7 @@ test("rebuild: the same answer is not stored twice, and a fix whose line has gon
 });
 
 test("rebuild: the inspection also has room to finish first time", () => {
-  assert.match(raw, /model: MODELS\.fast, maxTokens: 14000, hardMax: 20000, tool: \{ name: "inspection"/);
+  assert.match(raw, /model: MODELS\.fast, maxTokens: 24000, hardMax: 40000, tool: \{ name: "inspection"/);
 });
 
 test("retention: an account closes only after a real notice, 30 days and 24 months of inactivity; activity cancels it (2.27.4)", () => {

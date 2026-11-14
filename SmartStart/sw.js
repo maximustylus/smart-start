@@ -2,7 +2,7 @@
 // Firestore and is cached by the Firestore SDK after sign-in; data.json is never
 // served from the hosted site and never cached here. Firebase and font requests
 // pass straight through.
-const VERSION = 'smartstart-v144';  // app 2.47.9, terms 1.4
+const VERSION = 'smartstart-v145';  // app 2.48.0, terms 1.4
 const SHELL = ['./', './index.html', './manifest.webmanifest', './firebase-config.js',
   './stuart.js', './admin.js', './privacy.html', './terms.html',
   './icons/smartstart-icon-light.svg?v=3', './icons/smartstart-icon-dark.svg?v=3', './icons/stuart.svg', './icons/smartstart-icon-light-180.png?v=3'];

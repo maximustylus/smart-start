@@ -265,7 +265,9 @@ async function claude(apiKey, { model, system, messages, maxTokens = 2000, tool,
   const sys = HOUSE + "\n\n" + (system || "") + (tool ? `\n\nAnswer by calling the tool "${tool.name}" with the complete result as its input; no prose outside the tool call.` : "");
   const t0 = Date.now();
   // 2.27.2: effort sets how long the model thinks before answering; left out it runs at the model's default (Sonnet 5.5: high)
-  try { r = await client.messages.create({ model, max_tokens: maxTokens, system: sys, messages, ...forced, ...(effort ? { output_config: { effort } } : {}) }); }
+  // 2.48.0: streamed, so long answers are not held to the SDK's ceiling for one-shot calls; the caller gets the
+  // finished message only (finalMessage), exactly as before
+  try { r = await client.messages.stream({ model, max_tokens: maxTokens, system: sys, messages, ...forced, ...(effort ? { output_config: { effort } } : {}) }).finalMessage(); }
   catch (e) {
     if (e instanceof Anthropic.RateLimitError) throw new HttpsError("resource-exhausted", "Stuart is busy. Try again in a minute.");
     if (e instanceof Anthropic.APIConnectionError) throw new HttpsError("unavailable", "Stuart could not reach the AI service. Try again.");
@@ -507,7 +509,7 @@ exports.stuartAnalyse = onCall({ secrets: [KEY], timeoutSeconds: 300 }, guard("s
     await jobRef.update({ stage: "fit", source, facts, updatedAt: FieldValue.serverTimestamp() });
     const cvText = prof.cvText ? prof.cvText.slice(0, 30000) : JSON.stringify(master || prof.profile).slice(0, 30000);
     const mCv = prof.cvText && master && arr(master.experience).length ? JSON.stringify({ headline: master.headline, summary: master.summary, experience: cvRoles(master), skills: master.skills, education: arr(master.education).map((x) => x.text), certifications: arr(master.certifications).map((x) => x.text) }).slice(0, 30000) : "";
-    const d = await claude(KEY.value(), { model: MODELS.deep, maxTokens: 8000, messages: [{ role: "user", content: `Produce a fit check as JSON only:
+    const d = await claude(KEY.value(), { model: MODELS.deep, maxTokens: 16000, hardMax: 32000, messages: [{ role: "user", content: `Produce a fit check as JSON only:
 { "hardScreens": [ { "requirement": "", "status": "Met|Partly met|Not met|Unconfirmed", "evidence": "", "gap": "" } ],
   "ats": { "must": [ { "term": "", "evidence": "" } ], "nice": [ { "term": "", "evidence": "" } ], "gap": [ { "term": "", "why": "" } ] },
   "coverage": { "present": 0, "total": 0 },
@@ -828,7 +830,7 @@ exports.stuartTailor = onCall({ secrets: [KEY], timeoutSeconds: 300 }, guard("st
   const budget = await reserve(uid, "tailor");
   try {
     const m = { headline: master.headline, summary: master.summary, experience: (master.experience || []).map((r) => ({ id: r.id, title: r.title, org: r.org, start: r.start, end: r.end, bullets: (r.bullets || []).map((b) => b.text) })), skills: master.skills, education: (master.education || []).map((x) => x.text), certifications: (master.certifications || []).map((x) => x.text), awards: (master.awards || []).map((x) => x.text) };
-    const r = await claude(KEY.value(), { model: MODELS.deep, maxTokens: 16000, hardMax: 20000, messages: [{ role: "user", content: `Tailor the user's master CV to the job below. Return JSON only:
+    const r = await claude(KEY.value(), { model: MODELS.deep, maxTokens: 32000, hardMax: 48000, messages: [{ role: "user", content: `Tailor the user's master CV to the job below. Return JSON only:
 { "cv": { "headline": "", "summary": "", "experience": [ { "id": "", "bullets": [""] } ], "skills": [""] },
   "resume": { "headline": "", "summary": "", "experience": [ { "id": "", "bullets": [""] } ], "skills": [""] },
   "letter": { "to": "", "greeting": "", "paragraphs": ["", "", "", ""], "closing": "Yours sincerely" },
@@ -911,7 +913,7 @@ exports.stuartQuick = onCall({ secrets: [KEY], timeoutSeconds: 300 }, guard("stu
     const task = kind === "letter" ? "Write a one-page cover letter from the user's master CV for the reader described in who_it_is_for."
       : context ? "Fit the user's master CV and a two-page resume to the reader described in who_it_is_for. There is no advertisement."
       : "Write a general two-page resume from the user's master CV. It is sent when someone asks for a resume and no role is named, so lead with the user's strongest and most recent evidence.";
-    const r = await claude(KEY.value(), { model: MODELS.deep, maxTokens: kind === "cv" || (kind === "resume" && context) ? 16000 : 6000, hardMax: 20000, messages: [{ role: "user", content: `${task} Return JSON only:
+    const r = await claude(KEY.value(), { model: MODELS.deep, maxTokens: kind === "cv" || (kind === "resume" && context) ? 32000 : 6000, hardMax: 48000, messages: [{ role: "user", content: `${task} Return JSON only:
 ${shape}
 Rules:
 - Build only from the master CV, the CV text and known_facts. Never add a figure, employer, title, date, qualification or outcome that is not there. You may reorder, select, shorten and reword.
@@ -1412,7 +1414,7 @@ async function inspectBuild(uid, build, master, job, round, R, cvText) {
   const strengths = met.concat(arr(a.transferable).map((t) => t && t.evidence).filter(Boolean).slice(0, 2), (ats.must || []).map((t) => t.evidence).filter(Boolean)).slice(0, 7); // 2.42.0: transferable evidence should be easy to find too
   const missing = {}; ["cv", "resume"].forEach((k) => { if (docs[k]) missing[k] = docs[k].keywords.filter((x) => !x.found).map((x) => x.term); });
   const mview = { experience: (master.experience || []).map((r) => ({ id: r.id, title: r.title, org: r.org, bullets: (r.bullets || []).map((b) => b.text) })), skills: master.skills || [] };
-  const r = await claude(KEY.value(), { model: MODELS.fast, maxTokens: 14000, hardMax: 20000, tool: { name: "inspection", schema: INSPECT_SCHEMA }, system: "You are the inspector. You did not write these documents; check them as a recruiter reading quickly would.", messages: [{ role: "user", content: `Inspect the tailored CV, resume and cover letter below for one job.
+  const r = await claude(KEY.value(), { model: MODELS.fast, maxTokens: 24000, hardMax: 40000, tool: { name: "inspection", schema: INSPECT_SCHEMA }, system: "You are the inspector. You did not write these documents; check them as a recruiter reading quickly would.", messages: [{ role: "user", content: `Inspect the tailored CV, resume and cover letter below for one job.
 1. strengths: for each item in "strengths" and each document (cv, resume), say whether a reader skimming finds it: "visible" (in the headline, profile or the first three bullets of a role), "buried" (present but lower down) or "absent". "where" is like "Role 1, bullet 5". Use the item's own short name (under six words).
 2. gapsClaimed: any term from "gaps" that a document claims as a skill or qualification the person has. Naming the gap honestly in the letter is not a claim. Return an empty list when none.
 3. fixes: at most four, only where they fix a missing keyword or a buried or absent strength. Allowed operations, nothing else:

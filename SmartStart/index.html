@@ -1663,7 +1663,7 @@ body.stuhi-on .fab{opacity:0;pointer-events:none}
     <div class="store__facts"><div><span>Version</span><b id="storever">2.3</b></div><div><span>Access</span><b>Sign-in</b></div><div><span>Language</span><b>EN</b></div><div><span>Data</span><b>Private</b></div></div>
     <div class="store__label">Preview</div>
     <div class="tour__track" id="tour">
-      <div class="shot shot--video"><video id="tourvid" muted playsinline loop preload="none" poster="preview/film-poster.jpg?v=8" aria-label="Preview video of SMART START, 60 seconds"><source src="preview/film.mp4?v=8" type="video/mp4"></video><span class="shot__badge">APP PREVIEW</span><button class="shot__snd" id="tourmute" type="button" aria-label="Turn sound on" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg></button></div>
+      <div class="shot shot--video"><video id="tourvid" muted playsinline loop preload="none" poster="preview/film-poster.jpg?v=8" aria-label="Preview video of SMART START, 60 seconds"><source src="preview/film.mp4?v=9" type="video/mp4"></video><span class="shot__badge">APP PREVIEW</span><button class="shot__snd" id="tourmute" type="button" aria-label="Turn sound on" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg></button></div>
       <img class="shot" src="preview/light-1.jpg?v=2" data-card="1" alt="What needs you, first: the dashboard with interviews, follow-ups and closing dates" loading="lazy">
       <img class="shot" src="preview/light-2.jpg?v=2" data-card="2" alt="See the fit before you apply: Stuart gives the fit score out of 100, the hard screens, keywords and a likelihood band with reasons" loading="lazy">
       <img class="shot" src="preview/light-3.jpg?v=2" data-card="3" alt="Know what the ATS looks for: the keywords your CV has and the ones it is missing" loading="lazy">
@@ -1930,7 +1930,7 @@ const ssConfirm=(m,o)=>ssDialog(m,o), ssAlert=m=>ssDialog(m,{alert:true});
 const fmt=iso=>{ if(!iso) return ""; const d=new Date(iso+"T00:00:00"); return isNaN(d)?iso:d.toLocaleDateString("en-GB",{day:"numeric",month:"short"}) };
 const days=iso=>{ if(!iso) return null; return Math.round((TODAY-new Date(iso+"T00:00:00"))/864e5) };
 const isoD=d=>d.toISOString().slice(0,10);
-const APP_VERSION="2.47.3", APP_BUILD="2026-11-14";
+const APP_VERSION="2.47.4", APP_BUILD="2026-11-14";
 let OWNER=false;
 const DRY=params.get("dryrun")==="1", IMPDEMO=MODE==="local"&&params.has("importdemo");
 let LOCAL_RAW=null, TR=null, STM=null, STORE=null, SS=null;
@@ -3348,7 +3348,7 @@ render();
   const PLAY='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
   const SOFF='<svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg>', SON='<svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
   vt.innerHTML=items.map(el=>el.classList.contains("shot--video")
-    ? `<div class="vslide"><div class="vvid" role="button" tabindex="0" aria-label="Play or pause the preview video"><video playsinline preload="metadata" poster="preview/film-poster.jpg?v=8"><source src="preview/film.mp4?v=8" type="video/mp4"></video><span class="vplay">${PLAY}</span><span class="vprog"><i></i></span><button class="shot__snd vsnd" type="button" aria-label="Turn sound off" aria-pressed="true">${SON}</button></div></div>`
+    ? `<div class="vslide"><div class="vvid" role="button" tabindex="0" aria-label="Play or pause the preview video"><video playsinline preload="metadata" poster="preview/film-poster.jpg?v=8"><source src="preview/film.mp4?v=9" type="video/mp4"></video><span class="vplay">${PLAY}</span><span class="vprog"><i></i></span><button class="shot__snd vsnd" type="button" aria-label="Turn sound off" aria-pressed="true">${SON}</button></div></div>`
     : `<div class="vslide"><img src="${el.getAttribute("src")}" alt="${esc(el.getAttribute("alt")||"")}"></div>`).join("");
   vd.innerHTML=items.map(()=>"<i></i>").join("");
   const slides=[...vt.children], wrap=vt.querySelector(".vvid"), vv=wrap&&wrap.querySelector("video"), bar=wrap&&wrap.querySelector(".vprog i"), vs=wrap&&wrap.querySelector(".vsnd");

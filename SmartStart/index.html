@@ -1663,15 +1663,15 @@ body.stuhi-on .fab{opacity:0;pointer-events:none}
     <div class="store__facts"><div><span>Version</span><b id="storever">2.3</b></div><div><span>Access</span><b>Sign-in</b></div><div><span>Language</span><b>EN</b></div><div><span>Data</span><b>Private</b></div></div>
     <div class="store__label">Preview</div>
     <div class="tour__track" id="tour">
-      <div class="shot shot--video"><video id="tourvid" muted playsinline loop preload="none" poster="preview/film-poster.jpg?v=8" aria-label="Preview video of SMART START, 60 seconds"><source src="preview/film.mp4?v=9" type="video/mp4"></video><span class="shot__badge">APP PREVIEW</span><button class="shot__snd" id="tourmute" type="button" aria-label="Turn sound on" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg></button></div>
-      <img class="shot" src="preview/light-1.jpg?v=2" data-card="1" alt="What needs you, first: the dashboard with interviews, follow-ups and closing dates" loading="lazy">
-      <img class="shot" src="preview/light-2.jpg?v=2" data-card="2" alt="See the fit before you apply: Stuart gives the fit score out of 100, the hard screens, keywords and a likelihood band with reasons" loading="lazy">
-      <img class="shot" src="preview/light-3.jpg?v=2" data-card="3" alt="Know what the ATS looks for: the keywords your CV has and the ones it is missing" loading="lazy">
-      <img class="shot" src="preview/light-4.jpg?v=2" data-card="4" alt="Never miss a closing date: every deadline on the calendar, with reminders" loading="lazy">
-      <img class="shot" src="preview/light-5.jpg?v=2" data-card="5" alt="Meet Stuart, your AI assistant: tailored, ATS-ready CVs, resumes and cover letters for every job" loading="lazy">
-      <img class="shot" src="preview/light-6.jpg?v=2" data-card="6" alt="No CV yet? Stuart builds it from scratch, one question at a time" loading="lazy">
-      <img class="shot" src="preview/light-7.jpg?v=2" data-card="7" alt="See what's working: reply rate, pace and where to aim next" loading="lazy">
-      <img class="shot" src="preview/light-8.jpg?v=2" data-card="8" alt="Your records stay yours: sign-in only, private mode hides salaries and notes until you tap, export or close your account" loading="lazy">
+      <div class="shot shot--video"><video id="tourvid" muted playsinline loop preload="none" poster="preview/film-poster.jpg?v=8" aria-label="Preview video of SMART START, 60 seconds"><source src="preview/film.mp4?v=10" type="video/mp4"></video><span class="shot__badge">APP PREVIEW</span><button class="shot__snd" id="tourmute" type="button" aria-label="Turn sound on" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg></button></div>
+      <img class="shot" src="preview/light-1.jpg?v=3" data-card="1" alt="What needs you, first: the dashboard with interviews, follow-ups and closing dates" loading="lazy">
+      <img class="shot" src="preview/light-2.jpg?v=3" data-card="2" alt="See the fit before you apply: Stuart gives the fit score out of 100, the hard screens, keywords and a likelihood band with reasons" loading="lazy">
+      <img class="shot" src="preview/light-3.jpg?v=3" data-card="3" alt="Know what the ATS looks for: the keywords your CV has and the ones it is missing" loading="lazy">
+      <img class="shot" src="preview/light-4.jpg?v=3" data-card="4" alt="Never miss a closing date: every deadline on the calendar, with reminders" loading="lazy">
+      <img class="shot" src="preview/light-5.jpg?v=3" data-card="5" alt="Meet Stuart, your AI assistant: tailored, ATS-ready CVs, resumes and cover letters for every job" loading="lazy">
+      <img class="shot" src="preview/light-6.jpg?v=3" data-card="6" alt="No CV yet? Stuart builds it from scratch, one question at a time" loading="lazy">
+      <img class="shot" src="preview/light-7.jpg?v=3" data-card="7" alt="See what's working: reply rate, pace and where to aim next" loading="lazy">
+      <img class="shot" src="preview/light-8.jpg?v=3" data-card="8" alt="Your records stay yours: sign-in only, private mode hides salaries and notes until you tap, export or close your account" loading="lazy">
     </div>
     <div class="tour__dots" id="tourdots" aria-hidden="true"></div>
     <div class="tdesk" id="tourdesk"></div>
@@ -1783,7 +1783,7 @@ function isDark(){ return root.dataset.theme ? root.dataset.theme==="dark" : mat
 /* 2.24.0: the app icon in every empty state (the hand-drawn placeholder is retired), following the theme */
 const nilIcon=()=>'<img class="nil__ic" src="icons/smartstart-icon-'+(isDark()?"dark":"light")+'-180.png" alt="" width="56" height="56">';
 /* 2.22.0: the guide images and the preview cards follow the theme the page is showing */
-function themeAssets(){ const t=isDark()?"dark":"light"; document.querySelectorAll("img.nil__ic").forEach(i=>{ const u="icons/smartstart-icon-"+t+"-180.png"; if(i.getAttribute("src")!==u) i.setAttribute("src",u); }); document.querySelectorAll("img.shot[data-card]").forEach(i=>{ const u="preview/"+t+"-"+i.dataset.card+".jpg?v=1"; if(i.getAttribute("src")!==u) i.setAttribute("src",u); }); if(window.tdeskTheme) window.tdeskTheme();
+function themeAssets(){ const t=isDark()?"dark":"light"; document.querySelectorAll("img.nil__ic").forEach(i=>{ const u="icons/smartstart-icon-"+t+"-180.png"; if(i.getAttribute("src")!==u) i.setAttribute("src",u); }); document.querySelectorAll("img.shot[data-card]").forEach(i=>{ const u="preview/"+t+"-"+i.dataset.card+".jpg?v=3"; if(i.getAttribute("src")!==u) i.setAttribute("src",u); }); if(window.tdeskTheme) window.tdeskTheme();
   try{ if(GD.i>=0) gdPaint(); if(view==="guide") render(); }catch(e){} }
 function syncIcons(){ themeAssets(); const src = isDark() ? "icons/smartstart-icon-dark.svg?v=3" : "icons/smartstart-icon-light.svg?v=3";
   for (const id of ["lockicon","shadeicon"]) { const el=document.getElementById(id); if(el) el.src=src; }
@@ -1930,7 +1930,7 @@ const ssConfirm=(m,o)=>ssDialog(m,o), ssAlert=m=>ssDialog(m,{alert:true});
 const fmt=iso=>{ if(!iso) return ""; const d=new Date(iso+"T00:00:00"); return isNaN(d)?iso:d.toLocaleDateString("en-GB",{day:"numeric",month:"short"}) };
 const days=iso=>{ if(!iso) return null; return Math.round((TODAY-new Date(iso+"T00:00:00"))/864e5) };
 const isoD=d=>d.toISOString().slice(0,10);
-const APP_VERSION="2.47.8", APP_BUILD="2026-11-14";
+const APP_VERSION="2.47.9", APP_BUILD="2026-11-14";
 let OWNER=false;
 const DRY=params.get("dryrun")==="1", IMPDEMO=MODE==="local"&&params.has("importdemo");
 let LOCAL_RAW=null, TR=null, STM=null, STORE=null, SS=null;
@@ -3328,7 +3328,7 @@ render();
 (()=>{ const box=document.getElementById("tourdesk"); if(!box) return;
   const F=[["What needs you, first","Interviews, follow-ups and closing dates, at the top."],["See the fit before you apply","The fit score, hard screens and a likelihood band with reasons."],["Know what the ATS looks for","The keywords your CV has and the ones it is missing."],["Never miss a closing date","Every deadline on one calendar."],["Meet Stuart, your AI assistant","Tailored, ATS-ready CVs, resumes and cover letters for every job."],["No CV yet? Stuart builds it","One question at a time, from scratch."],["See what's working","Reply rate, pace and where to aim next."],["Your records stay yours","Sign-in only. Private mode. Export or close any time."]];
   const wide=matchMedia("(min-width:900px)"); let i=0, manual=false, last=0;
-  const src=n=>"preview/desk/"+(isDark()?"dark":"light")+"-"+(n+1)+".jpg?v=4";
+  const src=n=>"preview/desk/"+(isDark()?"dark":"light")+"-"+(n+1)+".jpg?v=5";
   box.innerHTML='<div class="tdesk__list" role="tablist" aria-label="Features">'+F.map((x,n)=>'<button type="button" role="tab" class="tdesk__it" data-n="'+n+'"><b>'+esc(x[0])+'</b><small>'+esc(x[1])+'</small></button>').join("")+'<button type="button" class="tdesk__film" id="tdesk-film"><span aria-hidden="true">▶</span> Watch the 60-second film</button></div><div class="tdesk__lap"><div class="tdesk__scr"><i></i><img class="tdesk__img" alt="" id="tdesk-img"></div><div class="tdesk__base"><i></i></div><div class="tour__dots tdesk__dots" aria-hidden="true">'+F.map(()=>"<i></i>").join("")+'</div></div>';
   const img=$("#tdesk-img"), tabs=[...box.querySelectorAll(".tdesk__it")], dots=[...box.querySelectorAll(".tdesk__dots i")];
   const paint=()=>{ tabs.forEach((t,n)=>{ t.classList.toggle("on",n===i); t.setAttribute("aria-selected",String(n===i)); }); dots.forEach((d,n)=>d.classList.toggle("on",n===i)); img.alt=F[i][0]+": sample data"; img.setAttribute("src",src(i)); };
@@ -3348,7 +3348,7 @@ render();
   const PLAY='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
   const SOFF='<svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg>', SON='<svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
   vt.innerHTML=items.map(el=>el.classList.contains("shot--video")
-    ? `<div class="vslide"><div class="vvid" role="button" tabindex="0" aria-label="Play or pause the preview video"><video playsinline preload="metadata" poster="preview/film-poster.jpg?v=8"><source src="preview/film.mp4?v=9" type="video/mp4"></video><span class="vplay">${PLAY}</span><span class="vprog"><i></i></span><button class="shot__snd vsnd" type="button" aria-label="Turn sound off" aria-pressed="true">${SON}</button></div></div>`
+    ? `<div class="vslide"><div class="vvid" role="button" tabindex="0" aria-label="Play or pause the preview video"><video playsinline preload="metadata" poster="preview/film-poster.jpg?v=8"><source src="preview/film.mp4?v=10" type="video/mp4"></video><span class="vplay">${PLAY}</span><span class="vprog"><i></i></span><button class="shot__snd vsnd" type="button" aria-label="Turn sound off" aria-pressed="true">${SON}</button></div></div>`
     : `<div class="vslide"><img src="${el.getAttribute("src")}" alt="${esc(el.getAttribute("alt")||"")}"></div>`).join("");
   vd.innerHTML=items.map(()=>"<i></i>").join("");
   const slides=[...vt.children], wrap=vt.querySelector(".vvid"), vv=wrap&&wrap.querySelector("video"), bar=wrap&&wrap.querySelector(".vprog i"), vs=wrap&&wrap.querySelector(".vsnd");

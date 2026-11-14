@@ -59,7 +59,10 @@
     ]
   },
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "firestore.rules",
+    "predeploy": [
+      "npm --prefix functions run test:rules"
+    ]
   },
   "functions": [
     {
@@ -77,6 +80,9 @@
     }
   ],
   "storage": {
-    "rules": "storage.rules"
+    "rules": "storage.rules",
+    "predeploy": [
+      "npm --prefix functions run test:rules"
+    ]
   }
 }

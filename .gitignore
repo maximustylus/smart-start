@@ -2,3 +2,6 @@
 .firebase/
 functions/node_modules/
 SmartStart/data.json
+
+# Firebase emulator logs
+*-debug.log

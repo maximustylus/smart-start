@@ -15,7 +15,12 @@ service cloud.firestore {
       return request.auth != null
         && request.auth.token.email in [
           'muhammad.alif@me.com'
-        ];
+        ]
+        && (ownerUids().size() == 0 || request.auth.uid in ownerUids());
+    }
+    // The owner's account ids (2.28.10), with OWNER_UIDS in functions/index.js: once listed, the address alone is not enough.
+    function ownerUids() {
+      return ['jNsl7PwT1eU0YbqPkLoZVo07aGv2'];
     }
     function isSelf(uid) {
       return request.auth != null && request.auth.uid == uid;
@@ -30,6 +35,7 @@ service cloud.firestore {
       match /jobs/{job} {
         allow read, write: if isSelf(uid);
         match /chat/{msg} { allow read, delete: if isSelf(uid); allow create, update: if false; } // the owner may delete a job with its chat (2.15.0)
+        match /practice/{id} { allow read, delete: if isSelf(uid); allow create, update: if false; } // interview practice, written by stuartPractise (2.28.0)
       }
       match /meta/{doc} { allow read: if isSelf(uid); allow write: if false; }
       // The tracker, from 31 October 2026 (see the data model): the user's own

@@ -1,19 +1,33 @@
 rules_version = '2';
 // SMART START: each user's uploads (CVs, advertisements) are readable and writable by
 // that user only. Uploads go through the Stuart functions (Admin SDK), which are not
-// bound by these rules; direct client writes are limited by size and type.
+// bound by these rules; direct client writes are limited by size and type. From 2.28.10 uploads need a confirmed
+// email, and types that open as a page in a browser (HTML, SVG) are refused; the storageLimit function holds each account's total.
+// From 2.38.0 the cover letter signature (users/{uid}/sign/) is read, written and deleted only by the stuartSign function.
 service firebase.storage {
   match /b/{bucket}/o {
     match /users/{uid}/{allPaths=**} {
-      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow read, delete: if request.auth != null && request.auth.uid == uid
+        && (resource == null || !resource.name.matches('(?s)users/[^/]+/sign/.*')); // the signature is reached only through the server (2.38.0)
       allow write: if request.auth != null && request.auth.uid == uid
+        && request.auth.token.email_verified == true
+        && !request.resource.name.matches('(?s)users/[^/]+/photo/.*') // the profile photo has its own, tighter rule below
+        && !request.resource.name.matches('(?s)users/[^/]+/sign/.*') // the signature: server only, so no download link to it can exist
         && request.resource.size < 15 * 1024 * 1024
         && (request.resource.contentType.matches('application/pdf')
             || request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document')
             || request.resource.contentType.matches('application/msword')
             || request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            || request.resource.contentType.matches('image/.*')
-            || request.resource.contentType.matches('text/.*'));
+            || request.resource.contentType.matches('image/(jpeg|png|gif|webp|heic|heif)')
+            || request.resource.contentType.matches('text/(plain|csv|markdown)'));
+    }
+    // One small profile photo per account (2.28.5): the app shrinks it first; this refuses anything else.
+    match /users/{uid}/photo/{name} {
+      allow write: if request.auth != null && request.auth.uid == uid
+        && request.auth.token.email_verified == true
+        && request.resource.size < 500 * 1024
+        && ((name == 'profile.jpg' && request.resource.contentType == 'image/jpeg')
+            || (name == 'round.png' && request.resource.contentType == 'image/png'));
     }
     match /{allPaths=**} {
       allow read, write: if false;

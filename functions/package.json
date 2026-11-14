@@ -14,9 +14,11 @@
     "jszip": "3.10.2",
     "mammoth": "^1.9.0",
     "nodemailer": "^7.0.5",
-    "pdf-parse": "^1.1.1"
+    "pdf-parse": "^1.1.1",
+    "web-push": "3.6.7"
   },
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "test:rules": "firebase emulators:exec --only firestore,storage --project demo-smartstart \"node --test test/rules/rules.emu.js\""
   }
 }

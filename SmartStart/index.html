@@ -1465,9 +1465,9 @@ body.gd-on{overflow:hidden}
 .gdv{position:relative}
 .gdv img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
 /* 2.24.3: phone proportions (corner radius about 11% of the width, a 9 px bezel, side buttons), not a pill */
-.gdv.ph{width:min(76vw,330px,calc((100dvh - 230px) * .462));aspect-ratio:390/844;padding:9px;border-radius:min(11%,38px);background:linear-gradient(145deg,#2c3a33,#0d1511);box-shadow:0 0 0 1.5px #4b5b53 inset,0 0 0 3px #0b1210,0 30px 60px rgba(0,0,0,.55)}
+.gdv.ph{--pw:min(76vw,330px,calc((100dvh - 230px) * .462));width:var(--pw);aspect-ratio:390/844;padding:9px;border-radius:calc(var(--pw) * .16);background:linear-gradient(145deg,#2c3a33,#0d1511);box-shadow:0 0 0 1.5px #4b5b53 inset,0 0 0 3px #0b1210,0 30px 60px rgba(0,0,0,.55)}
 .gdv.ph::before,.gdv.ph::after{content:"";position:absolute;width:3px;border-radius:2px;background:#3a4a42}.gdv.ph::before{left:-6px;top:22%;height:11%}.gdv.ph::after{right:-6px;top:26%;height:16%}
-.gdv.ph .gdv__scr{position:relative;width:100%;height:100%;border-radius:min(8.5%,30px);overflow:hidden;background:#000}
+.gdv.ph .gdv__scr{position:relative;width:100%;height:100%;border-radius:calc(var(--pw) * .135);overflow:hidden;background:#000}
 .gdv.lap{width:min(100%,calc((100dvh - 230px) * 1.5),900px)}
 .gdv.lap .gdv__scr{position:relative;aspect-ratio:16/10;padding:14px 14px 18px;border-radius:18px 18px 4px 4px;background:linear-gradient(#202a25,#0c1310);box-shadow:0 0 0 1.5px #44524b inset,0 30px 70px rgba(0,0,0,.55)}
 .gdv.lap .gdv__scr img{border-radius:4px}
@@ -1930,7 +1930,7 @@ const ssConfirm=(m,o)=>ssDialog(m,o), ssAlert=m=>ssDialog(m,{alert:true});
 const fmt=iso=>{ if(!iso) return ""; const d=new Date(iso+"T00:00:00"); return isNaN(d)?iso:d.toLocaleDateString("en-GB",{day:"numeric",month:"short"}) };
 const days=iso=>{ if(!iso) return null; return Math.round((TODAY-new Date(iso+"T00:00:00"))/864e5) };
 const isoD=d=>d.toISOString().slice(0,10);
-const APP_VERSION="2.47.4", APP_BUILD="2026-11-14";
+const APP_VERSION="2.47.5", APP_BUILD="2026-11-14";
 let OWNER=false;
 const DRY=params.get("dryrun")==="1", IMPDEMO=MODE==="local"&&params.has("importdemo");
 let LOCAL_RAW=null, TR=null, STM=null, STORE=null, SS=null;
@@ -2831,15 +2831,15 @@ function render(){
 
 /* ---------- guide (2.21.0): topics on a page; each opens a lightbox inside a phone or a laptop, by screen ---------- */
 const GUIDE=[
-  ["insights","Start here: Insights","Insights opens first. How many jobs you have applied for, your reply rate, interviews and days to reply, your pipeline by stage, and the median fit, keyword and aspiration scores."],
+  ["insights","Start here: Insights","Insights opens first. How many jobs you have applied for, your reply rate, interviews and days to reply, your pipeline by stage, and the median fit, keyword and aspiration scores. Where to aim compares sectors, from industries to programmes such as apprenticeships, and Stuart can suggest each one. Stuart's review, when you ask, reads your closed and quiet applications together and reports the patterns, with questions to think about."],
   ["applications","Applications","Every application, grouped by what it needs. Needs you sits at the top, with interviews, follow-ups and closing dates. Tap any row to open it."],
   ["add","Add an application","Tap + to add a job. Paste the advertisement, share the link or add a screenshot. Stuart reads it, checks the keywords and scores your fit before you apply."],
   ["window","Inside an application","Each application keeps its stage history, dates, the documents you sent and the next step. Change the stage as things move; the history records each date. Edit organisation and role fixes a name Stuart could not read from the advertisement."],
   ["timeline","Timeline","Every closing date, interview and follow-up in date order, so nothing slips. Quiet applications are flagged once the follow-up window passes."],
   ["documents","Documents","Every CV, resume and letter by version, linked to the applications it went to."],
-  ["stuart","Stuart, your AI assistant","A fit score out of 100, the hard screens, keywords, transferable skills and a likelihood band with reasons. Stuart coaches you on your gaps one question at a time, then builds a tailored CV, resume and cover letter that you check and send. It also drafts the application email and practises interviews with you. When someone simply asks for your resume, Writer makes a CV, resume or cover letter from your master CV with no job needed. Download PDF works on any device; on an iPhone it opens the share sheet."],
-  ["cv","Writer, Your rules and Loadout","Your master CV, the rules Stuart follows in every document, and What you've told Stuart: your answers, kept so Stuart does not ask again. Check for repeats finds lines that say the same thing twice. Loadout gives a job's CV a designed look, such as Executive in colours you choose; the plain copy always stays for hiring systems."],
-  ["settings","Settings and privacy","Your account and optional photo, appearance, export and backup, privacy mode, the sign-out time, help and closing your account."]];
+  ["stuart","Stuart, your AI assistant","A fit score out of 100, the hard screens, keywords, transferable skills and a likelihood band with reasons. Stuart coaches you on your gaps one question at a time, then builds a tailored CV, resume and cover letter that you check and send. It also drafts the application email and practises interviews with you. Home holds your jobs with Stuart; Writer holds your CV. Download PDF works on any device; on an iPhone it opens the share sheet."],
+  ["cv","Writer: your CV and documents","Your master CV, the rules Stuart follows in every document, and What you've told Stuart: your answers, kept so Stuart does not ask again. Check for repeats finds lines that say the same thing twice. Make a document gives you a CV, resume or cover letter from your master CV with no job needed: share it as a PDF or Word file, then add it as an application if you like."],
+  ["settings","Settings and privacy","Your account, an optional photo and signature, appearance, notifications, export and backup, privacy mode, the sign-out time, help and closing your account."]];
 const GD={i:-1};
 const GUIDE_GO={insights:["insights"],applications:["applications"],add:["applications","add"],window:["applications"],timeline:["timeline"],documents:["documents"],stuart:["stuart"],cv:["stuart","cv"],settings:["settings"]};
 function gdGoThere(){ const g=GUIDE[GD.i]; if(!g) return; const [v,extra]=GUIDE_GO[g[0]]||["insights"]; gdClose(); view=v; try{ location.hash=v; }catch(e){} render(); scrollTo({top:0,behavior:"instant"});
@@ -2849,7 +2849,7 @@ function gdGoThere(){ const g=GUIDE[GD.i]; if(!g) return; const [v,extra]=GUIDE_
 const guideSeenKey=()=>"ss-guide-seen-"+((USER&&USER.uid)||"local");
 function guideFirstRun(){ if(MODE==="local") return false; try{ if(localStorage.getItem(guideSeenKey())) return false; localStorage.setItem(guideSeenKey(),"1"); }catch(e){ return false; } return true; }
 const guideDesk=()=>matchMedia("(min-width:1024px)").matches;
-const gImg=(k,desk)=>"guide/"+(isDark()?"dark":"light")+"/"+(desk?"d_":"m_")+k+".jpg?v=3";
+const gImg=(k,desk)=>"guide/"+(isDark()?"dark":"light")+"/"+(desk?"d_":"m_")+k+".jpg?v=4";
 function renderGuide(){ const desk=guideDesk();
   return '<div class="gd"><div class="ihead"><h1>Guide</h1></div><p class="gd__sub">How SMART START works, one screen at a time. Tap a topic to see it on '+(desk?'a laptop':'your phone')+'.</p>'
     +'<div class="gd__grid">'+GUIDE.map((g,i)=>'<button type="button" class="gd__c" data-act="gd-open" data-i="'+i+'"><span class="gd__th'+(desk?' d':'')+'"><img src="'+gImg(g[0],desk)+'" alt="" loading="lazy"></span><span class="gd__n">'+(i+1)+'</span><b>'+esc(g[1])+'</b><span class="gd__t">'+esc(g[2].split(". ")[0].replace(/\.$/,""))+'.</span></button>').join("")+'</div></div>'; }

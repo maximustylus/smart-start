@@ -45,8 +45,8 @@ test("names off: no employer name reaches the lock screen", () => {
   const items = [{ t: "Harbourside Clinics closes in 3 days" }, { t: "Follow up with Meridian Care Group" }];
   const on = T.summaryText(items, true), off = T.summaryText(items, false);
   assert.equal(on.title, "Your daily summary"); assert.equal(on.body, "Harbourside Clinics closes in 3 days. Follow up with Meridian Care Group.");
-  assert.equal(off.title, "Your daily summary"); assert.equal(off.body, "2 things to look at. Open SMART START to see them.");
-  assert.equal(T.summaryText([{ t: "x" }], false).body, "1 thing to look at. Open SMART START to see them.");
+  assert.equal(off.title, "Your daily summary"); assert.equal(off.body, "2 things to look at. Open Smart Start to see them.");
+  assert.equal(T.summaryText([{ t: "x" }], false).body, "1 thing to look at. Open Smart Start to see them.");
   assert.doesNotMatch(JSON.stringify(off), /Harbourside|Meridian/);
   assert.match(T.summaryText(items.concat(items, items), true).body, /And 3 more\.$/);
 });

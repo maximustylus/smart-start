@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>SMART START</title>
+<title>Smart Start</title>
 <meta name="description" content="Job search tracker: applications, documents and dates.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#f3f8f4" media="(prefers-color-scheme: light)">
@@ -21,7 +21,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="SMART START">
+<meta name="apple-mobile-web-app-title" content="Smart Start">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
@@ -1930,7 +1930,7 @@ const ssConfirm=(m,o)=>ssDialog(m,o), ssAlert=m=>ssDialog(m,{alert:true});
 const fmt=iso=>{ if(!iso) return ""; const d=new Date(iso+"T00:00:00"); return isNaN(d)?iso:d.toLocaleDateString("en-GB",{day:"numeric",month:"short"}) };
 const days=iso=>{ if(!iso) return null; return Math.round((TODAY-new Date(iso+"T00:00:00"))/864e5) };
 const isoD=d=>d.toISOString().slice(0,10);
-const APP_VERSION="2.48.0", APP_BUILD="2026-11-14";
+const APP_VERSION="2.48.1", APP_BUILD="2026-11-15";
 let OWNER=false;
 const DRY=params.get("dryrun")==="1", IMPDEMO=MODE==="local"&&params.has("importdemo");
 let LOCAL_RAW=null, TR=null, STM=null, STORE=null, SS=null;

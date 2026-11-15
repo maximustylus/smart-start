@@ -1929,28 +1929,28 @@ exports.stuartCoach = onCall({ secrets: [KEY], timeoutSeconds: 180 }, guard("stu
 
 /* ---------- 9b. Verification and password-reset emails in SMART START's own design (2.23.0) ---------- */
 const APP_URL = "https://smartstart-careers.web.app/";
-const MAIL_FROM = '"SMART START" <muhammad.alif@me.com>';
+const MAIL_FROM = '"Smart Start" <muhammad.alif@me.com>';
 const MAIL_RATE = { hour: 3, day: 8 }; // per address, whatever the client
 const ICONS = { light: "icons/smartstart-icon-light-180.png", dark: "icons/smartstart-icon-dark-180.png" };
 function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 // one template, two kinds; both icons travel in the email and a dark-mode block picks one (Apple Mail, Outlook honour it; Gmail inverts on its own)
 function mailBody(kind, link) {
   const v = kind === "verify";
-  const subject = v ? "Confirm your email for SMART START" : "Reset your SMART START password";
+  const subject = v ? "Confirm your email for Smart Start" : "Reset your Smart Start password";
   const h1 = v ? "Welcome. One tap to confirm." : "Reset your password.";
-  const lead = v ? "Thanks for joining SMART START. Confirm your email address and your tracker is yours to keep." : "Someone asked to reset the password for this address. If it was you, choose a new password with the button below. The link works once and expires in an hour.";
+  const lead = v ? "Thanks for joining Smart Start. Confirm your email address and your tracker is yours to keep." : "Someone asked to reset the password for this address. If it was you, choose a new password with the button below. The link works once and expires in an hour.";
   const cta = v ? "Confirm my email" : "Choose a new password";
   const note = v ? "Stuart, the AI assistant, opens once your address is confirmed." : "If it was not you, ignore this email: your password stays as it is.";
-  const foot = v ? "If you did not create a SMART START account, you can ignore this email." : "This email was sent because a password reset was requested for your address.";
+  const foot = v ? "If you did not create a Smart Start account, you can ignore this email." : "This email was sent because a password reset was requested for your address.";
   const L = esc(link);
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><title>${esc(subject)}</title>
 <style>:root{color-scheme:light dark;supported-color-schemes:light dark}body{margin:0;background:#f3f8f4;font-family:-apple-system,Helvetica,Arial,sans-serif}.em{background:#f3f8f4;padding:22px 18px 26px;color:#0c2a22}.card{background:#ffffff;border-radius:18px;padding:26px 22px 22px;text-align:center;max-width:440px;margin:0 auto}.logo{width:72px;height:72px;border-radius:18px;display:block;margin:0 auto 12px}.logo.dark{display:none}.brand{font:800 18px/1 Helvetica,Arial;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;color:#0c2a22}.brand b{color:#1a8a55}h1{font:700 22px/1.25 Helvetica,Arial;margin:0 0 10px;color:#0c2a22}p{font:400 15px/1.55 Helvetica,Arial;margin:0 0 14px;color:#2b3d35}.btn{display:inline-block;background:#06432c;color:#ffffff;text-decoration:none;font:700 15px/1 Helvetica,Arial;padding:15px 26px;border-radius:999px;margin:4px 0 18px}.alt{font-size:12px;color:#5f716a;word-break:break-all}.alt a{color:#1a8a55}.note{font-size:13px;color:#5f716a;margin:0}.foot{text-align:center;color:#5f716a;font-size:12px;line-height:1.5;margin:18px auto 0;max-width:440px}.foot b{color:#0c2a22}
 @media (prefers-color-scheme:dark){body,.em{background:#0c2a22!important;color:#eaf5ee!important}.card{background:#10342a!important}.logo.light{display:none!important}.logo.dark{display:block!important}.brand,h1,.foot b{color:#eaf5ee!important}.brand b{color:#3ddc8a!important}p{color:#c4d6cb!important}.alt,.note,.foot{color:#a9bcb2!important}.alt a{color:#3ddc8a!important}.btn{background:#3ddc8a!important;color:#06432c!important}}</style></head>
-<body><div class="em"><div class="card"><img class="logo light" src="${APP_URL}${ICONS.light}" width="72" height="72" alt="SMART START"><img class="logo dark" src="${APP_URL}${ICONS.dark}" width="72" height="72" alt=""><div class="brand">Smart <b>Start</b></div>
+<body><div class="em"><div class="card"><img class="logo light" src="${APP_URL}${ICONS.light}" width="72" height="72" alt="Smart Start"><img class="logo dark" src="${APP_URL}${ICONS.dark}" width="72" height="72" alt=""><div class="brand">Smart <b>Start</b></div>
 <h1>${h1}</h1><p>${lead}</p><a class="btn" href="${L}">${cta}</a>
 <p class="alt">If the button does not work, open this link:<br><a href="${L}">${L}</a></p><p class="note">${note}</p></div>
-<div class="foot">${foot}<br><b>SMART START</b> &middot; Developed by Firstletter Lab<br>Private by design: your records stay yours.</div></div></body></html>`;
-  const text = `${h1}\n\n${lead}\n\n${cta}: ${link}\n\n${note}\n\n${foot}\nSMART START, developed by Firstletter Lab. Private by design: your records stay yours.\n`;
+<div class="foot">${foot}<br><b>Smart Start</b> &middot; Developed by Firstletter Lab<br>Private by design: your records stay yours.</div></div></body></html>`;
+  const text = `${h1}\n\n${lead}\n\n${cta}: ${link}\n\n${note}\n\n${foot}\nSmart Start, developed by Firstletter Lab. Private by design: your records stay yours.\n`;
   return { subject, html, text };
 }
 function mailConfigured(url) { return /^smtps?:\/\/.+@.+/.test(String(url || "")); }
@@ -2030,9 +2030,9 @@ function inactiveAction(meta, noticeAt, email, now = Date.now()) {
 const mailStale = (d, now = Date.now()) => !(Array.isArray(d && d.sent) && d.sent.some((t) => now - t < DAY_MS));
 function inactiveMail(closeOn) {
   const when = new Date(closeOn).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Singapore" });
-  const subject = "Your SMART START account will close unless you sign in";
-  const text = `You have not used SMART START for almost two years. As the privacy notice says, inactive accounts are closed and their data deleted.\n\nSign in before ${when} to keep your account: ${APP_URL}\n\nIf you do nothing, your account, records, files and any remaining credits will be deleted on or after that date. You can export a backup after signing in.\n\nSMART START, developed by Firstletter Lab.\n`;
-  const html = `<p>You have not used SMART START for almost two years. As the privacy notice says, inactive accounts are closed and their data deleted.</p><p><a href="${esc(APP_URL)}">Sign in</a> before <b>${esc(when)}</b> to keep your account.</p><p>If you do nothing, your account, records, files and any remaining credits will be deleted on or after that date. You can export a backup after signing in.</p><p>SMART START, developed by Firstletter Lab.</p>`;
+  const subject = "Your Smart Start account will close unless you sign in";
+  const text = `You have not used Smart Start for almost two years. As the privacy notice says, inactive accounts are closed and their data deleted.\n\nSign in before ${when} to keep your account: ${APP_URL}\n\nIf you do nothing, your account, records, files and any remaining credits will be deleted on or after that date. You can export a backup after signing in.\n\nSmart Start, developed by Firstletter Lab.\n`;
+  const html = `<p>You have not used Smart Start for almost two years. As the privacy notice says, inactive accounts are closed and their data deleted.</p><p><a href="${esc(APP_URL)}">Sign in</a> before <b>${esc(when)}</b> to keep your account.</p><p>If you do nothing, your account, records, files and any remaining credits will be deleted on or after that date. You can export a backup after signing in.</p><p>Smart Start, developed by Firstletter Lab.</p>`;
   return { subject, text, html };
 }
 exports.retentionDaily = onSchedule({ schedule: "every day 03:30", timeZone: "Asia/Singapore", secrets: [MAIL], timeoutSeconds: 540 }, async () => {
@@ -2086,7 +2086,7 @@ async function spendCheck() {
   const ref = db.doc(`statsDaily/${sgToday()}`), day = (await ref.get()).data() || {}, spent = othersSpend(day), limit = await dailyLimit(), level = spendAlertDue(spent, limit, day.alert);
   if (!level) return 0;
   const text = `Accounts other than yours have used US$${spent.toFixed(2)} of AI today, against the daily limit of US$${limit.toFixed(2)}.${level === 100 ? " Stuart is stopped for those accounts until midnight, Singapore time. To raise the limit, set dailyUsd in config/limits in the Firebase console." : ""} Open the admin dashboard to see which accounts.`;
-  await nodemailer.createTransport(mailUrl(MAIL.value())).sendMail({ from: MAIL_FROM, to: OWNERS[0], subject: `SMART START: ${level}% of today's AI limit`, text });
+  await nodemailer.createTransport(mailUrl(MAIL.value())).sendMail({ from: MAIL_FROM, to: OWNERS[0], subject: `Smart Start: ${level}% of today's AI limit`, text });
   await ref.set({ alert: level }, { merge: true });
   return level;
 }
@@ -2289,7 +2289,7 @@ async function reminders(uid, p) {
 const stuartDone = (kind) => (kind === "docs" ? "your CV, resume and cover letter are ready" : "the fit check is ready");
 const summaryText = (items, names) => {
   const n = items.length, count = n === 1 ? "1 thing to look at" : `${n} things to look at`;
-  return { title: "Your daily summary", body: names ? items.slice(0, 3).map((x) => x.t.replace(/[.\s]+$/, "")).join(". ") + (n > 3 ? `. And ${n - 3} more.` : ".") : `${count}. Open SMART START to see them.` };
+  return { title: "Your daily summary", body: names ? items.slice(0, 3).map((x) => x.t.replace(/[.\s]+$/, "")).join(". ") + (n > 3 ? `. And ${n - 3} more.` : ".") : `${count}. Open Smart Start to see them.` };
 };
 // Every 15 minutes: people whose summary time has come get one message a day. At this scale every device is read; past a few thousand, keep a schedule index instead.
 exports.pushSummary = onSchedule({ schedule: "every 15 minutes", timeZone: "Asia/Singapore", secrets: [VAPID], timeoutSeconds: 300 }, async () => {

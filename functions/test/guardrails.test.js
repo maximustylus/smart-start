@@ -164,7 +164,7 @@ test("auth emails: the link is escaped, both icons travel, and nothing but the l
     assert.ok(m.text.includes(evil), "the plain-text part carries the raw link");
     assert.doesNotMatch(m.html + m.text, /\+65/);
   }
-  assert.match(T.mailBody("verify", "x").subject, /Confirm your email/); assert.match(T.mailBody("reset", "x").subject, /Reset your SMART START password/);
+  assert.match(T.mailBody("verify", "x").subject, /Confirm your email/); assert.match(T.mailBody("reset", "x").subject, /Reset your Smart Start password/);
 });
 test("auth emails: an unset or malformed MAIL_SMTP means 'not configured', never a send", () => {
   for (const v of ["", "unset", "hello", "smtp://nouser"]) assert.equal(T.mailConfigured(v), false, v);

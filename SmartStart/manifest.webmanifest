@@ -1,6 +1,6 @@
 {
-  "name": "SMART START",
-  "short_name": "SMART START",
+  "name": "Smart Start",
+  "short_name": "Smart Start",
   "description": "Career tracker: applications, documents and dates. Sign-in required.",
   "start_url": "./index.html",
   "scope": "./",

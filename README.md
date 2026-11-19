@@ -14,7 +14,7 @@ This repository shows the code behind the app. It holds no user data: each user'
 | `functions/` | Cloud Functions for Stuart (`index.js`): 24 APIs called by the app and five background jobs (daily retention, an hourly spending watch, two notification jobs and an upload size limit), with the guardrail tests (`test/`) |
 | `firestore.rules`, `storage.rules` | Rules that let each user read and write only their own data |
 | `firebase.json`, `.firebaserc` | Firebase configuration |
-| `docs/Build_Stats.md` | How the first version was built, in numbers, as counted on 4 November 2026 |
+| `docs/Build_Stats.md` | How the app was built, in numbers, as counted on 19 November 2026 |
 
 The people, organisations and figures in the guide and preview images are sample content.
 

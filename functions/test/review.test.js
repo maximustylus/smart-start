@@ -81,6 +81,20 @@ test("the model's reply is held to the rules: counted, sourced, no advice, no pr
   assert.deepEqual(T.reviewClean(null, rows, source), { observations: [], questions: [] });
 });
 
+test("2.50.3 each observation carries a short headline and a count badge for the card; the full text is not cut at 320 characters", () => {
+  const rows = new Array(9).fill(0).map(() => ({})), source = '{"closed_or_quiet":9}\nunsuccessful | level: Manager | unmet: A team of 20 or more\nno reply | channel: portal';
+  const long = "3 of the 9 asked for a team of 20 or more, marked unmet. " + "The roles were at Manager level and each listed people leadership among the first lines of the advertisement in the same words. ".repeat(3);
+  const out = T.reviewClean({ observations: [
+    { text: "3 of the 9 asked for a team of 20 or more.", head: "Manager roles: a team of 20 or more, unmet", apps: [0, 1, 2], source: "hard screens" },
+    { text: "All 2 with no reply came through a portal.", head: "You should apply directly instead of through portals", apps: [3, 4], source: "channel" },
+    { text: long, apps: [5, 6, 7], source: "level" },
+  ] }, rows, source);
+  assert.deepEqual(out.observations.map((o) => o.badge), ["3/9", "2/2", "3/9"]);
+  assert.equal(out.observations[0].head, "Manager roles: a team of 20 or more, unmet");
+  assert.equal(out.observations[1].head, "All 2 with no reply came through a portal", "a headline that advises is replaced by one taken from the text");
+  assert.ok(out.observations[2].text.length > 320 && out.observations[2].head === "3 of the 9 asked for a team of 20 or more, marked unmet");
+});
+
 test("organisation names never reach the model, the lines are wrapped, and the call holds budget", () => {
   const body = raw.slice(raw.indexOf("exports.stuartReview")).split("/* ---------- 9. Build a CV from scratch")[0];
   const built = body.slice(body.indexOf("const lines ="), body.indexOf("const facts ="));

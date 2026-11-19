@@ -77,9 +77,14 @@ function errMsg(e) {
 }
 // While Stuart works, the app's idle sign-out waits (index.html reads window.ssBusy).
 // 2.24.1: every call shows: a ring on Stuart's icon and a toast with what he is doing, until the last call in flight returns
-async function busyWhile(p, label) { window.ssBusy = (window.ssBusy || 0) + 1; const t = document.getElementById("busytoast"), x = document.getElementById("busytxt");
-  if (x) x.textContent = label || "Stuart is working…"; if (t) t.hidden = false; document.body.classList.add("ss-busy");
-  try { return await p; } finally { window.ssBusy = Math.max(0, (window.ssBusy || 1) - 1); if (!window.ssBusy) { document.body.classList.remove("ss-busy"); if (t) t.hidden = true; } if (ctx && ctx.touch) ctx.touch(); } }
+// 2.50.2: the panel sits in the middle of the screen; the time in brackets goes on its own line; "Keep working while I wait"
+// (or a tap outside the panel) shrinks it to the strip at the bottom until every call in flight has returned
+async function busyWhile(p, label) { window.ssBusy = (window.ssBusy || 0) + 1; const t = document.getElementById("busytoast"), x = document.getElementById("busytxt"), sub = document.getElementById("busysub");
+  const L = String(label || "Stuart is working…"), m = L.match(/^(.*?)\s*\(([^)]*)\)\s*(…)?$/), when = m ? m[2].charAt(0).toUpperCase() + m[2].slice(1) + ". " : "";
+  if (x) x.textContent = m ? m[1] + "…" : L; if (sub) sub.textContent = when + "This closes by itself when Stuart is done.";
+  if (t) { if (!t.dataset.w) { t.dataset.w = "1"; t.addEventListener("click", (e) => { if (e.target.id === "busymin" || e.target === t) t.classList.add("mini"); }); } t.hidden = false; }
+  document.body.classList.add("ss-busy");
+  try { return await p; } finally { window.ssBusy = Math.max(0, (window.ssBusy || 1) - 1); if (!window.ssBusy) { document.body.classList.remove("ss-busy"); if (t) { t.hidden = true; t.classList.remove("mini"); } } if (ctx && ctx.touch) ctx.touch(); } }
 async function call(name, data, busyLabel) {
   state.busy = busyLabel; state.err = ""; render();
   try { const r = await busyWhile(callables[name](data), busyLabel); state.busy = ""; return r.data; }
@@ -251,7 +256,11 @@ async function logConfirm(i) {
 function renderDemo() {
   state.profile = { consentAI: true, profile: { headline: "Demo profile", roles: [], skills: [] }, intention: "pivot" };
   state.plan = { plan: { headline: "Move from operations into a product role by next summer.", smart: { specific: "A product manager post", measurable: "Three shortlists", achievable: "Eight years of delivery evidence", relevant: "Sector change", timeBound: "By June 2027" }, grow: { goal: "Product manager role", reality: "Strong delivery record, no product title yet", options: ["Start-ups", "Agencies", "In-house teams"], will: ["Two applications a week", "Refresh the CV monthly"] } }, confirmed: true };
-  state.jobs = [{ id: "demo", status: "Considering", facts: { organisation: "Example Logistics Group", role: "Operations Manager", closingDate: "2026-11-30", location: "Singapore" }, analysis: { roleFit: { score: 78, met: 6, partly: 3, notMet: 1 }, careerAspiration: { score: 70, reasons: "Larger team, wider remit" }, coverage: { present: 9, total: 11 }, band: { level: "medium", reasons: ["Hard screens met", "Two keywords missing", "Competitive post"] }, recommendation: "apply", why: "Strong fit on delivery and teamwork.", hardScreens: [{ requirement: "Degree", status: "Met", evidence: "BSc, MSc" }], transferable: [{ requirement: "Experience with outsourcing partners", evidence: "Opened two new clinics on time and within budget.", difference: "Clinic contractors and suppliers, not an outsourced service partner.", say: "Lead with delivering through suppliers to a deadline, then name the clinic setting." }], ats: { must: [{ term: "stakeholder", evidence: "Skills line" }], nice: [], gap: [{ term: "Power BI", why: "Not on the sample CV" }] }, nextSteps: ["Tailor the CV", "Ask about the team size"], openQuestions: [] } }];
+  state.jobs = [{ id: "demo", status: "Considering", facts: { organisation: "Example Logistics Group", role: "Operations Manager", closingDate: "2026-11-30", location: "Singapore" }, analysis: { roleFit: { score: 78, met: 6, partly: 3, notMet: 1 }, careerAspiration: { score: 70, reasons: "Larger team, wider remit" }, coverage: { present: 9, total: 11 }, band: { level: "medium", reasons: ["Hard screens met", "Two keywords missing", "Competitive post"] }, recommendation: "apply", why: "Strong fit on delivery and teamwork.", hardScreens: [{ requirement: "Degree", status: "Met", evidence: "BSc, MSc" }], transferable: [{ requirement: "Experience with outsourcing partners", evidence: "Opened two new clinics on time and within budget.", difference: "Clinic contractors and suppliers, not an outsourced service partner.", say: "Lead with delivering through suppliers to a deadline, then name the clinic setting." }], ats: { must: [{ term: "stakeholder", evidence: "Skills line" }], nice: [], gap: [{ term: "Power BI", why: "Not on the sample CV" }] }, nextSteps: ["Tailor the CV", "Ask about the team size"], openQuestions: [],
+    employer: "A regional provider running community clinics and services", angle: "Operations leader in community health who improves how services run, proved by cutting appointment no-shows from 18% to 11% across three clinics.",
+    bridge: { fact: "Leads clinic operations across three community sites.", why: "The employer runs the same kind of services." },
+    matchTable: [{ line: "Degree in business or a related field", kind: "hard screen", evidence: "BSc, MSc", rating: "Met", gap: "" }, { line: "Lead transformation programmes across services", kind: "duty", evidence: "Led a team of 12 across three clinics; cut appointment no-shows from 18% to 11% (Head of Operations)", rating: "Met", gap: "" },
+      { line: "Work with outsourcing partners to deliver change", kind: "duty", evidence: "Opened two new clinics on time and within budget (Operations Manager)", rating: "Partly met", gap: "Contractors and suppliers, not an outsourced service partner" }, { line: "Use data to track performance", kind: "requirement", evidence: "Built the referral dashboard used by 40 clinicians each week", rating: "Met", gap: "" }, { line: "Experience with Power BI", kind: "advantage", evidence: "", rating: "Not met", gap: "Not on your CV" }] } }];
   state.chat = [{ role: "assistant", text: "This is a preview with sample content. Sign in on the hosted app to use Stuart." }];
   if (!state.cv) state.cv = { version: "3.2", name: "Adam", contact: { email: "adam@mail.example", phone: "", location: "Singapore", links: "" }, headline: "Operations leader in community health", summary: "Leads clinic operations and service improvement across three sites, with a record of better access and lower no-show rates.",
     experience: [{ id: "r1", title: "Head of Operations", org: "Meridian Care Group", location: "Singapore", start: "Jan 2021", end: "present", bullets: [{ text: "Led a team of 12 across three clinics; cut appointment no-shows from 18% to 11% in 2024.", src: "cv" }, { text: "Built the referral dashboard used by 40 clinicians each week.", src: "cv" }, { text: "Responsible for budgeting and planning for the department.", src: "cv" }] },
@@ -267,8 +276,98 @@ function renderDemo() {
 // stuartTailor). Edits stay in a draft until Save; Stuart's suggestions change nothing until accepted.
 const TAB_ICO = { home: '<path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>', cv: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 20h7"/>', loadout: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M10 9v12"/>' };
 const TABS = [["home", "Home"], ["cv", "Writer"], ["loadout", "Loadout"]];
-const SECS = [["contact", "Contact"], ["summary", "Headline and summary"], ["experience", "Experience"], ["education", "Education"], ["skills", "Skills"], ["certifications", "Certifications"], ["awards", "Awards"], ["publications", "Publications"], ["referees", "Referees"]];
-const LISTS = ["education", "certifications", "awards", "publications", "referees"];
+/* 2.50.0 Writer keeps the whole record (docs/Stuart_EvidenceBased_Plan_v0.1.md, Phase W). Core sections are fixed; every other
+   section is a catalogue type (a list at c[type]) or the user's own heading (c.own[i]). c.layout holds the order, own headings,
+   which heading prints, sections kept off documents, when a section goes on tailored documents, and the preset. The catalogue is
+   the same in functions/index.js (test/sections.cv.test.js keeps them equal). */
+const SECS = [["contact", "Contact"], ["summary", "Profile"], ["experience", "Experience"], ["education", "Education"], ["skills", "Skills"]];
+const CV_CAT = [["achievements", "Selected achievements"], ["appointments", "Appointments and memberships"], ["registration", "Professional registration"], ["certifications", "Certifications"], ["training", "Training and courses"], ["research", "Research and projects"], ["publications", "Publications"], ["presentations", "Presentations"], ["conferences", "Conferences"], ["grants", "Grants and funding"], ["teaching", "Teaching"], ["supervision", "Supervision"], ["service", "Service and administration"], ["patents", "Patents"], ["awards", "Awards"], ["volunteering", "Volunteering"], ["cocurricular", "Co-curricular activities"], ["languages", "Languages"], ["links", "Portfolio and links"], ["interests", "Interests"], ["referees", "Referees"]];
+const CV_OFF = ["training", "conferences", "interests", "referees"];
+const CV_KEYS = CV_CAT.map((x) => x[0]);
+const PRESETS = [["", "General"], ["graduate", "Graduate"], ["academic", "Academic"], ["healthcare", "Healthcare"], ["public", "Public sector"], ["technology", "Technology"], ["creative", "Creative"], ["changer", "Career changer"], ["senior", "Senior"]];
+/* 2.50.1 headings read alike: one typed in capitals becomes sentence case (a word with no vowels, such as CPD, stays); at import,
+   Title Case ("Honours and Awards") becomes sentence case too. The same function is in functions/index.js. */
+function headCase(s, title) {
+  const t = String(s || "").trim(), ws = t.split(/(\s+)/), long = ws.filter((w) => w.replace(/[^A-Za-z]/g, "").length > 3);
+  const caps = /[A-Z]/.test(t) && !/[a-z]/.test(t), tc = !!title && long.length > 1 && long.every((w) => /^[^A-Za-z]*[A-Z][a-z]/.test(w));
+  if (!caps && !tc) return t;
+  let first = true;
+  return ws.map((w) => { const l = w.replace(/[^A-Za-z]/g, ""); if (!l) return w;
+    const keep = caps ? l.length > 1 && !/[AEIOUY]/i.test(l) : /[A-Z][^A-Z]*[A-Z]/.test(l), o = keep ? w : w.toLowerCase();
+    const r = first && !keep ? o.replace(/[a-z]/, (ch) => ch.toUpperCase()) : o; first = false; return r; }).join("");
+}
+function cvSecs(c) { // every optional section, in the user's order
+  c = c || {}; const L = c.layout || {}, H = L.heading || {}, P = L.printOwn || {}, O = L.off || {}, M = L.mode || {}, ord = Array.isArray(L.order) ? L.order : [];
+  const all = CV_CAT.filter(([k]) => (Array.isArray(c[k]) && c[k].length) || ord.includes(k)).map(([k, lab]) => ({ key: k, own: headCase(H[k]) || lab, print: P[k] && H[k] ? headCase(H[k]) : lab, std: lab, items: Array.isArray(c[k]) ? c[k] : [], off: Object.prototype.hasOwnProperty.call(O, k) ? !!O[k] : CV_OFF.includes(k), mode: M[k] || "auto" }))
+    .concat((Array.isArray(c.own) ? c.own : []).map((s, i) => { const k = "own:" + (s && s.id), h = headCase(s && s.heading) || "Untitled section"; return { key: k, own: h, print: h, std: "", items: Array.isArray(s && s.items) ? s.items : [], off: !!O[k], mode: M[k] || "auto", idx: i }; }));
+  const pos = (s) => { const i = ord.indexOf(s.key); return i < 0 ? 1000 + all.indexOf(s) : i; };
+  return all.slice().sort((a, b) => pos(a) - pos(b));
+}
+const secText = (s) => s.items.filter((x) => x && hasText(x.text));
+function printSecs(d, kind) { return cvSecs(d).filter((s) => !s.off && secText(s).length && (s.key !== "referees" || kind === "cv")); }
+function secItems(c, k, make) { if (String(k).startsWith("own:")) { const o = (c.own || []).find((x) => "own:" + x.id === k); return o ? (o.items = o.items || []) : []; } if (make && !Array.isArray(c[k])) c[k] = []; return c[k] || []; }
+function allLists(c) { return ["education"].concat(CV_KEYS).map((k) => c[k]).filter(Array.isArray).concat((c.own || []).map((o) => o.items || [])); }
+const pageCap = (c) => (c && c.layout && c.layout.preset === "academic" ? Infinity : 6);
+const pagesText = (c, n) => (isFinite(pageCap(c)) ? "about " + n + " of 6 pages" : "about " + n + (n === 1 ? " page" : " pages") + " · no limit");
+const secHTML = (s, fmt) => `<div class="h">${esc(s.print)}</div>${secText(s).map(fmt).join("")}`;
+// 2.50.0 every section of the uploaded CV, in its order, with the type the user chose in the import review (or Stuart's)
+function sectionsFromProfile(pr) {
+  const out = { layout: { order: [], heading: {}, printOwn: {}, off: {} }, own: [] }, L = out.layout, line = (x) => ({ text: String(x && x.text != null ? x.text : x) });
+  if (!Array.isArray(pr.sections)) { // a profile read before 2.50.0
+    [["certifications", pr.certifications], ["appointments", pr.appointments], ["awards", pr.awards], ["publications", pr.publications], ["research", pr.projects], ["presentations", pr.presentations]].forEach(([k, v]) => { if (Array.isArray(v) && v.length) { out[k] = v.map(line); L.order.push(k); } });
+    return out;
+  }
+  pr.sections.forEach((s) => {
+    const items = (Array.isArray(s.items) ? s.items : []).map(line).filter((x) => hasText(x.text)), heading = headCase(s.heading, true), t = String(s.use || s.type || "other");
+    if (!items.length) return;
+    if (t === "education") { out.education = (out.education || []).concat(items); return; }
+    if (CV_KEYS.includes(t)) { out[t] = (out[t] || []).concat(items); if (!L.order.includes(t)) L.order.push(t); const std = (CV_CAT.find((x) => x[0] === t) || [])[1]; if (heading && std && heading.toLowerCase() !== std.toLowerCase()) L.heading[t] = heading; return; }
+    const id = rid(); out.own.push({ id, heading: heading || "Other", items }); L.order.push("own:" + id);
+  });
+  return out;
+}
+// 2.50.0 import review: every heading Stuart found, where it goes in Writer and how many entries, before anything is saved
+const IMP_OPTS = [["education", "Education"]].concat(CV_CAT, [["other", "Your own heading"]]);
+const impLab = (t) => (IMP_OPTS.find((x) => x[0] === t) || [, "Your own heading"])[1];
+function openImport(had) {
+  const pr = (state.profile && state.profile.profile) || {};
+  state.imp = { had, rows: (Array.isArray(pr.sections) ? pr.sections : []).map((s) => { const t = IMP_OPTS.some((x) => x[0] === s.type) ? s.type : "other"; return { heading: headCase(s.heading, true) || "Untitled", use: t, alt: IMP_OPTS.some((x) => x[0] === s.alt) && s.alt !== t ? s.alt : "", n: (Array.isArray(s.items) ? s.items : []).length }; }) };
+  state.tab = "cv"; render();
+}
+function impHTML() {
+  const I = state.imp; if (!I) return ""; const pr = (state.profile && state.profile.profile) || {}, roles = (pr.roles || []).length, sk = (pr.skills || []).length;
+  const row = (a, b, n) => `<tr><td>${esc(a)}</td><td>${b}</td><td class="n">${esc(n)}</td></tr>`, open = I.rows.filter((r) => r.alt && !r.asked).length;
+  const pc = pr.contact || {}, cn = ["email", "phone", "location", "links"].filter((k) => hasText(pc[k])).length;
+  return `<div class="sx-rv" role="dialog" aria-modal="true" aria-label="What Stuart read"><div class="sx-rvb card"><div class="sx-rvh"><b>Stuart read your CV · ${I.rows.length + 4} sections, nothing left out</b><button type="button" class="sx-pvx" data-stu="imp-x" aria-label="Close">${ICO.x}</button></div>
+    <p class="sx-sp sm">Check where each section of your CV goes in Writer. Change any that look wrong, then ${I.had ? "review before you replace your master CV" : "save it as your master CV"}. Identification numbers are removed; Writer has no fields for age, NRIC, race, religion, marital status or National Service.</p>
+    <div class="sx-imp"><table><thead><tr><th>In your CV</th><th>In Writer</th><th class="n">Entries</th></tr></thead><tbody>
+    ${row("Contact", "Contact", cn ? cn + " of 4" : "none found")}${row("Profile", "Profile", pr.summary ? 1 : 0)}${row("Experience", "Experience", roles + (roles === 1 ? " role" : " roles"))}${row("Skills", "Skills", sk)}
+    ${I.rows.map((r, i) => `<tr class="${r.alt && !r.asked ? "ask" : ""}"><td>${esc(r.heading)}${r.alt && !r.asked ? `<small>Could also be ${esc(impLab(r.alt))}. Which fits?</small>` : ""}</td><td><select data-imp="${i}" aria-label="Where ${esc(r.heading)} goes">${IMP_OPTS.map(([v, l]) => `<option value="${v}"${r.use === v ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></td><td class="n">${r.n}</td></tr>`).join("")}
+    </tbody></table></div>
+    ${open ? `<p class="sx-sp sm">${open} ${open === 1 ? "heading needs" : "headings need"} your choice (in amber). Stuart's guess is selected.</p>` : ""}
+    <div class="sx-btns"><button type="button" class="btn sx-b" data-stu="imp-ok">${I.had ? "Review and replace" : "Save as my master CV"}</button><button type="button" class="sx-lk" data-stu="imp-x">Cancel</button></div></div></div>`;
+}
+async function finishImport() {
+  const I = state.imp; if (!I) return; state.imp = null; const pr = (state.profile && state.profile.profile) || {};
+  (pr.sections || []).forEach((s, i) => { if (I.rows[i]) s.use = I.rows[i].use; });
+  if (!I.had) { state.cvDraft = masterFromProfile(); state.cvDirty = true; await cvSave(true); state.tab = "cv"; state.cvSec = "experience"; render(); if (ctx.toast) ctx.toast("Stuart read your CV and saved it as your master CV (v1.0). Check each section."); return; }
+  const old = state.cv || {}, d = masterFromProfile();
+  // 2.50.1 contact from the new file where it gives one; anything it leaves out stays as it was
+  const oc = old.contact || {}, nc = d.contact || {}, ct = {}; ["email", "phone", "location", "links"].forEach((k) => { ct[k] = hasText(nc[k]) && (k !== "email" || hasText((pr.contact || {}).email)) ? nc[k] : oc[k] || nc[k] || ""; });
+  state.cvDraft = Object.assign(d, { contact: ct, version: old.version || "1.0" });
+  if (!(d.referees || []).length && (old.referees || []).length) { d.referees = old.referees; }
+  state.cvDirty = true; state.tab = "cv"; state.cvSec = "experience"; render();
+}
+const DEMO_IMPORT = { name: "Adam", contact: { email: "adam@mail.example", phone: "", location: "Singapore", links: "" }, headline: "Operations leader in community health", summary: "Leads clinic operations across three sites.",
+  roles: [{ title: "Head of Operations", organisation: "Meridian Care Group", start: "Jan 2021", end: "present", bullets: ["Led a team of 12 across three clinics; cut appointment no-shows from 18% to 11% in 2024."] }],
+  skills: ["Operations", "Service design", "Data dashboards"],
+  sections: [{ heading: "Selected Achievements", type: "achievements", items: ["Cut appointment no-shows from 18% to 11% across three clinics (2024)"] },
+    { heading: "Education", type: "education", items: ["MSc Health Services Management, Example University, 2016", "Project management certificate, Example Polytechnic (in progress, 2027)"] },
+    { heading: "Presentations and Speaking Engagements", type: "presentations", items: ["2026 · Example Health Forum: reducing missed appointments", "2025 · Example University guest lecture: clinic operations"] },
+    { heading: "Honours and Awards", type: "awards", alt: "achievements", items: ["Service excellence award, Meridian Care Group, 2023"] },
+    { heading: "Volunteer Work", type: "volunteering", items: ["Stock and delivery co-ordinator, Example Food Bank (2022 – Present)"] },
+    { heading: "Interests", type: "interests", items: ["Running, community gardening"] },
+    { heading: "Referees", type: "referees", items: ["Available on request"] }] };
 const rid = () => Math.random().toString(36).slice(2, 9);
 const clone = (o) => JSON.parse(JSON.stringify(o || null));
 const ICO = {
@@ -290,10 +389,11 @@ const ICO = {
 const hasText = (v) => !!String(v || "").trim();
 function masterFromProfile() {
   const pr = (state.profile && state.profile.profile) || {};
-  return { version: "1.0", name: pr.name || "", contact: { email: (ctx.user && ctx.user.email) || "", phone: "", location: "", links: "" }, headline: pr.headline || "", summary: pr.summary || "",
+  const pc = pr.contact || {}; // 2.50.1 the contact details at the top of the uploaded CV
+  return { version: "1.0", name: pr.name || "", contact: { email: pc.email || (ctx.user && ctx.user.email) || "", phone: pc.phone || "", location: pc.location || "", links: pc.links || "" }, headline: pr.headline || "", summary: pr.summary || "",
     experience: (pr.roles || []).map((r) => ({ id: rid(), title: r.title || "", org: r.organisation || "", location: "", start: r.start || "", end: r.end || "", bullets: (r.bullets || []).map((t) => ({ text: String(t), src: "cv" })) })),
     education: (pr.education || []).map((e) => ({ text: [e.qualification, e.institution, e.year].filter(Boolean).join(", ") })),
-    skills: (pr.skills || []).map(String), certifications: (pr.certifications || []).map((c) => ({ text: String(c) })), awards: (pr.awards || []).map((c) => ({ text: String(c) })), publications: (pr.publications || []).map((c) => ({ text: String(c) })), referees: [] };
+    skills: (pr.skills || []).map(String), ...sectionsFromProfile(pr) };
 }
 const draft = () => state.cvDraft || state.cv;
 function secDone(c, k) {
@@ -301,7 +401,7 @@ function secDone(c, k) {
   if (k === "contact") return hasText(c.name) && (hasText((c.contact || {}).email) || hasText((c.contact || {}).phone));
   if (k === "summary") return hasText(c.headline) || hasText(c.summary);
   if (k === "skills") return (c.skills || []).length > 0;
-  return (c[k] || []).some((x) => hasText(x.text) || hasText(x.title));
+  return (String(k).startsWith("own:") ? secItems(c, k) : c[k] || []).some((x) => hasText(x.text) || hasText(x.title));
 }
 function cvStats(c) {
   if (!c) return { pct: 0, noFig: 0, pages: 0 };
@@ -315,7 +415,7 @@ function estPages(d, kind, signed) {
   if (kind === "letter") return Math.max(1, Math.ceil(((signed ? 11 : 10) + (d.paragraphs || []).reduce((n, p) => n + ln(p) + 1, 0)) / 46));
   let n = 4 + (d.headline ? 2 : 0) + (d.summary ? ln(d.summary) + 2 : 0);
   (d.experience || []).forEach((r) => { n += 2 + (r.location ? 1 : 0); (r.bullets || []).forEach((b) => { n += ln(b.text); }); });
-  ["education", "certifications", "awards", "publications"].concat(kind === "cv" ? ["referees"] : []).forEach((k) => { if ((d[k] || []).length) n += 2 + d[k].reduce((m, x) => m + ln(x.text), 0); });
+  [{ items: d.education || [] }].concat(printSecs(d, kind)).forEach((s) => { const L = secText(s); if (L.length) n += 2 + L.reduce((m, x) => m + ln(x.text), 0); });
   if ((d.skills || []).length) n += 2 + ln(d.skills.join(", "));
   return Math.max(1, Math.ceil(n / 46));
 }
@@ -346,10 +446,11 @@ function execDoc(d, kind, photo) {
   const c = d.contact || {}, L = [];
   L.push(`<div class="cvh${photo ? " wp" : ""}">${photo ? `<img class="cvp" src="${esc(photo)}" alt="">` : ""}<div class="nm">${esc(d.name || "Your name")}</div>${d.headline ? `<div class="tg">${esc(d.headline)}</div>` : ""}<div class="cl">${esc([c.location, c.email, c.phone, c.links].filter(Boolean).join(" | "))}</div></div><div class="bd">`);
   if (d.summary) L.push(`<div class="h">Profile</div><p${d.summaryUnsourced ? ' class="uns"' : ""}>${esc(d.summary)}</p>`);
+  printSecs(d, kind).filter((s) => s.key === "achievements").forEach((s) => L.push(secHTML(s, (x) => `<p>${esc(noRunning(x.text))}</p>`)));
   if ((d.skills || []).length) L.push(`<div class="h">Skills</div>${d.skills.join(", ").split(/,\s+(?=[\p{L}][\p{L}\p{N} &\/-]*:\s)/u).map((g) => { const i = g.indexOf(": "); return i > 0 && i < 60 ? `<div class="cp"><b>${esc(g.slice(0, i))}</b> ${esc(g.slice(i + 2))}</div>` : `<div class="cp">${esc(g)}</div>`; }).join("")}`);
   if ((d.experience || []).length) L.push(`<div class="h">Experience</div>` + d.experience.map((r) => `<div class="ro"><div class="rl"><b>${esc(r.title || "")}${r.org ? ", " + esc(r.org) : ""}</b> <span>${esc([r.start, r.end].filter(Boolean).join(" to "))}</span></div>${r.location ? `<div class="lc">${esc(r.location)}</div>` : ""}<ul>${(r.bullets || []).filter((b) => hasText(b.text)).map((b) => `<li${b.unsourced ? ' class="uns" title="Figure not found in your CV: confirm it"' : ""}>${esc(b.text)}</li>`).join("")}</ul></div>`).join(""));
-  for (const [k, lab] of [["education", "Education"], ["certifications", "Certifications"], ["awards", "Awards"], ["publications", "Publications"]]) if ((d[k] || []).some((x) => hasText(x.text))) L.push(`<div class="h">${lab}</div>${d[k].filter((x) => hasText(x.text)).map((x) => { const [y, rest] = yearFirst(noRunning(x.text)); return `<div class="yl"><span class="y">${esc(y)}</span> ${esc(rest)}</div>`; }).join("")}`);
-  if (kind === "cv" && (d.referees || []).some((x) => hasText(x.text))) L.push(`<div class="h">Referees</div>${d.referees.filter((x) => hasText(x.text)).map((x) => `<p>${esc(x.text)}</p>`).join("")}`);
+  [{ print: "Education", items: d.education || [] }].concat(printSecs(d, kind).filter((s) => s.key !== "achievements" && s.key !== "referees")).forEach((s) => { if (secText(s).length) L.push(secHTML(s, (x) => { const [y, rest] = yearFirst(noRunning(x.text)); return `<div class="yl"><span class="y">${esc(y)}</span> ${esc(rest)}</div>`; })); });
+  printSecs(d, kind).filter((s) => s.key === "referees").forEach((s) => L.push(secHTML(s, (x) => `<p>${esc(x.text)}</p>`)));
   return L.join("") + "</div>";
 }
 function docHTML(d, kind, photo, look) {
@@ -357,10 +458,11 @@ function docHTML(d, kind, photo, look) {
   const c = d.contact || {}, L = [];
   L.push(`<div class="cvh${photo ? " wp" : ""}">${photo ? `<img class="cvp" src="${esc(photo)}" alt="">` : ""}<div class="nm">${esc(d.name || "Your name")}</div><div class="cl">${esc([c.location, c.email, c.phone, c.links].filter(Boolean).join(" | "))}</div></div>`);
   if (d.headline || d.summary) L.push(`<div class="h">Profile</div>${d.headline ? `<p><b>${esc(d.headline)}</b></p>` : ""}${d.summary ? `<p${d.summaryUnsourced ? ' class="uns"' : ""}>${esc(d.summary)}</p>` : ""}`);
+  printSecs(d, kind).filter((s) => s.key === "achievements").forEach((s) => L.push(secHTML(s, (x) => `<p>${esc(noRunning(x.text))}</p>`)));
   if ((d.experience || []).length) L.push(`<div class="h">Experience</div>` + d.experience.map((r) => `<div class="ro"><div class="rl"><b>${esc(r.title || "")}${r.org ? ", " + esc(r.org) : ""}</b><span>${esc([r.start, r.end].filter(Boolean).join(" to "))}</span></div>${r.location ? `<div class="lc">${esc(r.location)}</div>` : ""}<ul>${(r.bullets || []).filter((b) => hasText(b.text)).map((b) => `<li${b.unsourced ? ' class="uns" title="Figure not found in your CV: confirm it"' : ""}>${esc(b.text)}</li>`).join("")}</ul></div>`).join(""));
-  for (const [k, lab] of [["education", "Education"], ["certifications", "Certifications"], ["awards", "Awards"], ["publications", "Publications"]]) if ((d[k] || []).some((x) => hasText(x.text))) L.push(`<div class="h">${lab}</div>${d[k].filter((x) => hasText(x.text)).map((x) => `<p>${esc(noRunning(x.text))}</p>`).join("")}`);
+  [{ print: "Education", items: d.education || [] }].concat(printSecs(d, kind).filter((s) => s.key !== "achievements" && s.key !== "referees")).forEach((s) => { if (secText(s).length) L.push(secHTML(s, (x) => `<p>${esc(noRunning(x.text))}</p>`)); });
   if ((d.skills || []).length) L.push(`<div class="h">Skills</div>${d.skills.join(", ").split(/,\s+(?=[\p{L}][\p{L}\p{N} &\/-]*:\s)/u).map((s) => `<p>${esc(s)}</p>`).join("")}`);
-  if (kind === "cv" && (d.referees || []).some((x) => hasText(x.text))) L.push(`<div class="h">Referees</div>${d.referees.filter((x) => hasText(x.text)).map((x) => `<p>${esc(x.text)}</p>`).join("")}`);
+  printSecs(d, kind).filter((s) => s.key === "referees").forEach((s) => L.push(secHTML(s, (x) => `<p>${esc(x.text)}</p>`)));
   if (look && look.base !== "classic") {
     const st = `--lk:${look.accent};--lkf:'${look.font}',Arial,sans-serif`, cls = `sx-a4 lk lk-${look.base} hd-${look.heading} sp-${look.spacing}`;
     // 2.35.0 the side panel holds the facts (contact, skills one per line, education, certifications); the main column holds the name, profile and experience
@@ -474,21 +576,20 @@ function viewHub() {
   return hubHead() + body;
 }
 /* CV builder */
-function secItems(c, k) { return k === "skills" ? null : (c[k] || []); }
 function viewBuilder() {
   const c = draft();
   if (state.ivOpen) return viewInterview();
   if (state.qk && state.cv) return viewQuick();
-  if (!c) return `<section class="card sx-c"><h2 class="sx-k">${ICO.doc} CV builder</h2><p class="sx-sp">Choose how to start your master CV. Nothing is saved until you press Save.</p>${startChoices()}${busyLine()}${errLine()}</section>`;
+  if (!c) return `${impHTML()}<section class="card sx-c"><h2 class="sx-k">${ICO.doc} CV builder</h2><p class="sx-sp">Choose how to start your master CV. Nothing is saved until you press Save.</p>${startChoices()}${busyLine()}${errLine()}</section>`;
   const k = state.cvSec, st = cvStats(c);
-  const secs = `<nav class="card sx-secs" aria-label="CV sections"><h2 class="sx-k">Sections</h2>${SECS.map(([key, lab]) => `<button type="button" class="sx-sec" data-stu="sec" data-k="${key}" aria-pressed="${k === key}"><span>${lab}</span><i class="sx-sd ${secDone(c, key) ? "done" : key === "referees" ? "off" : "todo"}" aria-label="${secDone(c, key) ? "Done" : "Empty"}"></i></button>`).join("")}</nav>`;
+  const secs = secsNav(c, k);
   // 2.46.1 one card: the documents you can make now, with the master CV's status (version in a pill) and its tools.
   // 2.46.2 on a computer the status and tools run along the top and the documents sit below as rows; on a phone the documents come first
   const tools = `<div class="wr-rows"><button type="button" class="wr-row" data-stu="cvchk">${ICO.check}<span>Check for repeats</span>${ICO.chev}</button><button type="button" class="wr-row" data-stu="iv-open">${ICO.spark}<span>Build from scratch</span>${ICO.chev}</button><label class="wr-row" title="Stuart reads a PDF, Word or text file and replaces this master CV; you review before saving">${ICO.up}<span>Replace from a file</span>${ICO.chev}<input type="file" id="stu-cv" accept=".pdf,.docx,.txt,.md,application/pdf" hidden></label></div>`;
   const save = `<section class="card wr${state.cv ? " two" : ""}${state.cvDirty ? " dirty" : ""}" aria-label="Writer">${state.cv ? quickCard() : ""}<div class="wr-s"><div class="sx-st0">${state.cvDirty ? cvDirtyHTML(c) : `<div class="wr-st"><i></i><b>Master CV</b><span>Saved</span><em class="wr-v">Version ${esc(c.version || "1.0")}</em></div>`}</div>${tools}</div></section>`;
-  const pv = `<section class="sx-pv${state.pvOpen ? " open" : ""}" aria-label="Preview"><div class="sx-pvh"><span>Preview · Clean template</span><span class="sx-pc ${st.pages > 6 ? "warn" : "ok"}" id="sx-pages">about ${st.pages} of 6 pages</span><button type="button" class="sx-pvx" data-stu="pv" aria-label="Close preview">${ICO.x}</button></div><div id="sx-pvb">${docHTML(c, "cv")}</div>
+  const pv = `<section class="sx-pv${state.pvOpen ? " open" : ""}" aria-label="Preview"><div class="sx-pvh"><span>Preview · Clean template</span><span class="sx-pc ${st.pages > pageCap(c) ? "warn" : "ok"}" id="sx-pages">${pagesText(c, st.pages)}</span><button type="button" class="sx-pvx" data-stu="pv" aria-label="Close preview">${ICO.x}</button></div><div id="sx-pvb">${docHTML(c, "cv")}</div>
     <div class="sx-pva"><button type="button" class="btn btn--ghost sx-b sm" data-stu="print" data-kind="master">${ICO.dl}PDF</button><button type="button" class="btn btn--ghost sx-b sm" data-stu="word" data-kind="master">${ICO.dl}Word</button></div></section>`;
-  return `${save}${chkCard()}${rulesCard()}${factsCard()}${rulesSheet()}<div class="sx-bld">${secs}<section class="card sx-ed cved">${editorHTML(c, k)}${busyLine()}${errLine()}<button type="button" class="btn sx-b sx-pvbtn" data-stu="pv">Preview · about ${st.pages} of 6 pages</button></section>${pv}</div>`;
+  return `${impHTML()}${save}${chkCard()}${rulesCard()}${factsCard()}${rulesSheet()}<div class="sx-bld">${secs}<section class="card sx-ed cved">${editorHTML(c, k)}${busyLine()}${errLine()}<button type="button" class="btn sx-b sx-pvbtn" data-stu="pv">Preview · ${pagesText(c, st.pages)}</button></section>${pv}</div>`;
 }
 /* ---------- 2.46.0 Make a document: a CV, resume or cover letter with no job behind it. The general resume is written once per
    master CV version and kept ready (users/{uid}/cv/quick, written by stuartQuick); "Make it fit" takes one line about the reader.
@@ -518,7 +619,7 @@ function viewQuick() {
   const pv = X ? `<section class="card sx-c"><div class="qk-ph"><h2 class="sx-k">${title}</h2><button type="button" class="btn btn--ghost sx-b sm" data-stu="qk-review">${ICO.eye}${k === "letter" ? "Check and edit" : "Review"}</button></div><div class="lo-pv"><div class="lo-pvi">${qkHTML(k, X, look)}</div></div>
       ${stale ? `<p class="sx-sp sm qk-w">Made from CV version ${esc(X.ver)}. Your master CV is now version ${esc(mv)}. <button type="button" class="qk-lnk" data-stu="qk-make" data-again="1">Update it</button></p>` : ""}${flags ? `<p class="sx-sp sm qk-w">${flags} ${flags === 1 ? "figure" : "figures"} to confirm. Open ${k === "letter" ? "Check and edit" : "Review"} to see ${flags === 1 ? "it" : "them"} in amber.</p>` : ""}</section>`
     : k === "resume" ? `<section class="card sx-c"><h2 class="sx-k">General resume</h2><p class="sx-sp">Stuart writes it once from your master CV and keeps it ready for the next time someone asks. About a minute.</p><button type="button" class="btn sx-b sx-full" data-stu="qk-make">${ICO.spark}Make my resume</button></section>` : "";
-  const src = k !== "letter" && Q.fit && Q.fit[k] ? `<div class="qk-ch"><button type="button" class="chip" data-stu="qk-src" data-v="general" aria-pressed="${S.src !== "fit"}">General</button><button type="button" class="chip" data-stu="qk-src" data-v="fit" aria-pressed="${S.src === "fit"}">For ${esc(String(Q.fit.context || "").slice(0, 40))}</button></div>` : "";
+  const src = k !== "letter" && Q.fit && Q.fit[k] ? `<div class="qk-ch"><button type="button" class="chip" data-stu="qk-src" data-m="general" aria-pressed="${S.src !== "fit"}">General</button><button type="button" class="chip" data-stu="qk-src" data-m="fit" aria-pressed="${S.src === "fit"}">For ${esc(String(Q.fit.context || "").slice(0, 40))}</button></div>` : "";
   const fit = k === "letter" ? "" : `<section class="card sx-c"><h2 class="sx-k">Make it fit (optional)</h2>${src}<input class="qk-in" id="qk-ctx" maxlength="300" value="${esc(S.ctx || "")}" placeholder="Who is it for? Role, organisation" aria-label="Who is it for"><button type="button" class="btn btn--ghost sx-b" data-stu="qk-make" data-fit="1">${ICO.spark}Fit it</button><p class="sx-sp sm">Leave empty for your general ${k === "cv" ? "CV" : "resume"}. Fitting takes about a minute and keeps to what your CV says.</p></section>`;
   const who = k !== "letter" ? "" : `<section class="card sx-c"><h2 class="sx-k">Who is it for</h2><input class="qk-in" id="qk-ctx" maxlength="300" value="${esc(S.ctx || "")}" placeholder="Role and organisation" aria-label="Who is it for"><textarea class="qk-in" id="qk-paste" rows="4" maxlength="6000" placeholder="Paste their message or the advertisement (optional)" aria-label="Their message or the advertisement">${esc(S.paste || "")}</textarea><button type="button" class="btn sx-b sx-full" data-stu="qk-make">${ICO.pen}${X ? "Write it again" : "Write the letter"}</button><p class="sx-sp sm">Stuart drafts, you check it, then share. About a minute.</p></section>`;
   const foot = X ? `<div class="qk-f"><button type="button" class="btn sx-b" data-stu="qk-pdf">${QK_ICO.share}${IOS ? "Share PDF" : "Download PDF"}</button><button type="button" class="btn btn--ghost sx-b" data-stu="qk-word">Word</button></div>${look ? `<p class="sx-sp sm">The loadout is in the PDF. Word copies are plain.</p>` : ""}<p class="sx-sp sm">After sharing: <button type="button" class="qk-lnk" data-stu="qk-app">Add as an application</button></p>` : "";
@@ -534,16 +635,43 @@ function demoQuick(k, context) { // local preview: no server, so the documents a
 }
 const nextVer = (v) => { const m = String(v || "1.0").match(/^(\d+)\.(\d+)$/); return m ? m[1] + "." + (Number(m[2]) + 1) : "1.1"; };
 const fld = (path, label, val, o = {}) => `<label class="sx-f${o.wide ? " wide" : ""}"><span>${label}</span>${o.area ? `<textarea data-cv="${path}" rows="${o.rows || 3}">${esc(val)}</textarea>` : `<input data-cv="${path}" value="${esc(val)}"${o.type ? ` type="${o.type}"` : ""} autocomplete="off">`}</label>`;
+// 2.50.0 the sections list: the five core sections, then every other section in the user's order, then Add a section
+function secsNav(c, k) {
+  const L = c.layout || {}, opt = cvSecs(c), btn = (key, lab, off) => `<button type="button" class="sx-sec" data-stu="sec" data-k="${esc(key)}" aria-pressed="${k === key}"><span>${esc(lab)}${off ? "<small>off</small>" : ""}</span><i class="sx-sd ${off ? "off" : secDone(c, key) ? "done" : "todo"}" aria-label="${off ? "Kept off documents" : secDone(c, key) ? "Done" : "Empty"}"></i></button>`;
+  const have = new Set(opt.map((s) => s.key)), menu = state.secMenu ? `<div class="sx-menu" role="menu">${CV_CAT.filter(([x]) => !have.has(x)).map(([x, l]) => `<button type="button" role="menuitem" data-stu="sec-new" data-k="${x}">${esc(l)}</button>`).join("")}<button type="button" role="menuitem" data-stu="sec-new" data-k="own">Your own heading…</button></div>` : "";
+  return `<nav class="card sx-secs" aria-label="CV sections"><h2 class="sx-k">Sections</h2><label class="sx-pre"><span>Preset</span><select data-lay="preset" aria-label="CV preset">${PRESETS.map(([v, l]) => `<option value="${v}"${(L.preset || "") === v ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+    <div class="sx-grp">Always</div>${SECS.map(([key, lab]) => btn(key, lab, false)).join("")}
+    ${opt.length ? `<div class="sx-grp">Your other sections</div>${opt.map((s) => btn(s.key, s.own, s.off)).join("")}` : ""}
+    <button type="button" class="sx-add" data-stu="sec-menu" aria-expanded="${!!state.secMenu}">${ICO.plus}Add a section</button>${menu}
+    <p class="sx-sp sm">${L.preset === "academic" ? "Academic: no page limit for your CV; resumes stay at two pages." : "CV up to six pages, resume two."} Off: kept in Writer, left off documents.</p></nav>`;
+}
+function secEditor(c, k) {
+  const s = cvSecs(c).find((x) => x.key === k); if (!s) return `<h2 class="sx-k">Section</h2><p class="sx-sp">This section has been removed. Choose another from the list.</p>`;
+  const own = k.startsWith("own:"), base = own ? `own.${s.idx}.items` : k, L = c.layout || {}, M = [["auto", "When it answers the job"], ["always", "Always"], ["never", "Never"]];
+  const say = { auto: "Stuart prints this section on a tailored CV or resume only when one of its entries is evidence for the job, and lists anything it left out so you can put it back.", always: "Printed on every tailored CV; a resume keeps the first three entries.", never: "Kept in Writer only; never printed on a tailored document." };
+  return `<div class="sx-rhd"><h2 class="sx-k">${esc(s.own)} · ${secText(s).length}</h2><span class="sx-mv"><button type="button" class="sx-ib" data-stu="sec-move" data-k="${esc(k)}" data-d="-1" aria-label="Move up">↑</button><button type="button" class="sx-ib" data-stu="sec-move" data-k="${esc(k)}" data-d="1" aria-label="Move down">↓</button></span></div>
+    <div class="sx-fg">${own ? fld(`own.${s.idx}.heading`, "Heading", s.own, { wide: true }) : `<label class="sx-f"><span>Your heading (kept in Writer)</span><input data-lay="heading" data-k="${k}" value="${esc(s.own)}" autocomplete="off"></label><label class="sx-f"><span>Printed on documents</span><select data-lay="print" data-k="${k}"><option value="std">${esc(s.std)}</option><option value="own"${(L.printOwn || {})[k] ? " selected" : ""}>Your heading</option></select></label>`}</div>
+    ${own ? "" : `<p class="sx-sp sm">Standard headings are easier for screening software to read. You can print your own instead.</p>`}
+    <ul class="sx-bul">${s.items.map((x, j) => `<li><input data-cv="${base}.${j}.text" value="${esc(x.text)}" aria-label="${esc(s.own)} ${j + 1}" autocomplete="off"><button type="button" class="sx-del" data-stu="li-del" data-k="${esc(k)}" data-j="${j}" aria-label="Remove">${ICO.x}</button></li>`).join("")}</ul>
+    <div class="sx-btns"><button type="button" class="sx-add" data-stu="li-add" data-k="${esc(k)}">${ICO.plus}Add an entry</button></div>
+    <h3 class="sx-k sm">On tailored documents</h3><div class="sx-seg" role="group" aria-label="On tailored documents">${M.map(([v, l]) => `<button type="button" data-stu="sec-mode" data-k="${esc(k)}" data-m="${v}" aria-pressed="${s.mode === v}">${l}</button>`).join("")}</div>
+    <p class="sx-sp sm">${say[s.mode] || say.auto}</p>
+    <label class="sx-chk"><input type="checkbox" data-lay="off" data-k="${esc(k)}"${s.off ? " checked" : ""}> Keep off documents (stays in Writer)</label>
+    ${k === "referees" ? `<p class="sx-sp sm">Referees appear on the CV only, never on the resume. Ask each referee before you name them; "Available on request" is enough.</p>` : ""}
+    <div class="sx-btns"><button type="button" class="sx-lk" data-stu="sec-del" data-k="${esc(k)}">Remove this section</button></div>`;
+}
 function editorHTML(c, k) {
+  if (!SECS.some((x) => x[0] === k)) return secEditor(c, k);
   const lab = (SECS.find((x) => x[0] === k) || [])[1] || "";
   if (k === "contact") { const t = c.contact || {}; return `<h2 class="sx-k">${lab}</h2><div class="sx-fg">${fld("name", "Full name", c.name)}${fld("contact.email", "Email", t.email, { type: "email" })}${fld("contact.phone", "Phone", t.phone, { type: "tel" })}${fld("contact.location", "Location", t.location)}${fld("contact.links", "Links (for example LinkedIn)", t.links, { wide: true })}</div><p class="sx-sp sm">Only what you type here goes on the CV. Leave out identification numbers and your home address.</p>`; }
   if (k === "summary") return `<h2 class="sx-k">${lab}</h2><div class="sx-fg">${fld("headline", "Headline", c.headline, { wide: true })}${fld("summary", "Summary", c.summary, { area: true, rows: 5, wide: true })}</div>${c.headlineUnsourced || c.summaryUnsourced ? `<span class="sx-unsf">The ${c.headlineUnsourced && c.summaryUnsourced ? "headline and summary contain" : c.headlineUnsourced ? "headline contains" : "summary contains"} a figure that is not in your answers or CV. Check it; editing clears this warning.</span>` : ""}${suggHTML("summary", null)}<button type="button" class="btn btn--ghost sx-b sm" data-stu="improve" data-sec="summary">${ICO.spark}Improve with Stuart</button>`;
   if (k === "skills") return `<h2 class="sx-k">${lab}</h2><div class="sx-fg">${fld("skills", "Skills, separated by commas", (c.skills || []).join(", "), { area: true, rows: 4, wide: true })}</div>`;
   if (k === "experience") {
     const ex = c.experience || [], i = Math.min(state.cvItem, Math.max(0, ex.length - 1)), r = ex[i];
-    const chips = `<div class="sx-roles" role="group" aria-label="Roles">${ex.map((x, n) => `<button type="button" data-stu="role" data-i="${n}" aria-pressed="${n === i}">${esc(x.title || "Untitled role")}${x.org ? `<span>${esc(x.org)}</span>` : ""}</button>`).join("")}<button type="button" class="sx-add" data-stu="role-add">${ICO.plus}Add a role</button></div>`;
-    if (!r) return `<h2 class="sx-k">${lab}</h2>${chips}`;
-    return `<h2 class="sx-k">${lab} · ${i + 1} of ${ex.length}</h2>${chips}
+    const addR = `<button type="button" class="sx-add" data-stu="role-add">${ICO.plus}Add a role</button>`, hd = (t) => `<div class="sx-rhd"><h2 class="sx-k">${t}</h2>${addR}</div>`;
+    const chips = `<div class="sx-roles" role="group" aria-label="Roles">${ex.map((x, n) => `<div class="sx-rc"><button type="button" data-stu="role" data-i="${n}" aria-pressed="${n === i}">${esc(x.title || "Untitled role")}${x.org || x.start ? `<span>${esc([x.org, [x.start, x.end].filter(Boolean).join(" to ")].filter(Boolean).join(" · "))}</span>` : ""}</button><button type="button" class="sx-rx" data-stu="role-del" data-i="${n}" aria-label="Remove ${esc(x.title || "this role")}">${ICO.x}</button></div>`).join("")}</div>`;
+    if (!r) return `${hd(lab)}${chips}`;
+    return `${hd(`${lab} · ${i + 1} of ${ex.length}`)}${chips}
     <div class="sx-fg">${fld(`experience.${i}.title`, "Job title", r.title)}${fld(`experience.${i}.org`, "Organisation", r.org)}${fld(`experience.${i}.start`, "Start", r.start)}${fld(`experience.${i}.end`, "End (or present)", r.end)}${fld(`experience.${i}.location`, "Location", r.location, { wide: true })}</div>
     <h3 class="sx-k sm">Achievements and duties</h3><ul class="sx-bul">${(r.bullets || []).map((b, j) => `<li><textarea data-cv="experience.${i}.bullets.${j}.text" rows="2" aria-label="Bullet ${j + 1}">${esc(b.text)}</textarea>${b.unsourced ? `<span class="sx-unsf">Contains a figure that is not in your answers or CV. Check it; editing the line clears this warning.</span>` : ""}${b.src === "stuart" ? `<span class="sx-src">Reworded with Stuart${b.confirmed ? " · figure confirmed by you" : ""}</span>` : b.src === "cv" ? `<span class="sx-src">From your uploaded CV</span>` : b.src === "interview" ? `<span class="sx-src">From your interview answers</span>` : ""}<button type="button" class="sx-del" data-stu="bul-del" data-i="${i}" data-j="${j}" aria-label="Remove bullet ${j + 1}">${ICO.x}</button></li>`).join("")}</ul>
     <div class="sx-btns"><button type="button" class="sx-add" data-stu="bul-add" data-i="${i}">${ICO.plus}Add a bullet</button></div>
@@ -649,7 +777,7 @@ function rewordCV(c, use, avoid) {
   let n = 0; const fx = (t) => { const s = String(t || ""), o = s.replace(phraseRe(avoid), (m, pre, x) => pre + caseLike(x, use)); if (o !== s) n++; return o; };
   c.headline = fx(c.headline); c.summary = fx(c.summary);
   (c.experience || []).forEach((r) => (r.bullets || []).forEach((b) => { b.text = fx(b.text); }));
-  LISTS.forEach((k) => (c[k] || []).forEach((x) => { x.text = fx(x.text); }));
+  allLists(c).forEach((L) => L.forEach((x) => { x.text = fx(x.text); }));
   c.skills = (c.skills || []).map(fx);
   return n;
 }
@@ -680,7 +808,7 @@ function startChoices() {
     <div class="sx-opt on"><span class="sx-oi">${ICO.spark}</span><b>Build from scratch</b><span class="sx-sp">Stuart asks you short questions, one at a time, and drafts each section from your answers. About 15 minutes; you can stop and come back.</span><div class="sx-btns"><button type="button" class="btn sx-b sm" data-stu="iv-open">${going ? "Continue the interview" : "Start the interview"}</button></div></div></div>`;
 }
 const ivStep = () => { const iv = state.iv; return iv && iv.step ? iv.step : "contact"; };
-function ivPreviewDoc() { const iv = state.iv || {}, d = iv.draft || {}; return Object.assign({ referees: [], awards: [], publications: [] }, d); }
+function ivPreviewDoc() { const iv = state.iv || {}, d = iv.draft || {}; return Object.assign({ referees: [], appointments: [], awards: [], publications: [] }, d); }
 function viewInterview() {
   const st = ivStep(), idx = IVS.findIndex((x) => x[0] === st), iv = state.iv || {}, d = iv.draft || {}, ct = d.contact || {};
   const strip = `<ol class="sx-ivs" aria-label="Interview steps">${IVS.map(([k, l], i) => `<li><button type="button" ${i < idx && k !== "contact" ? `data-stu="iv-goto" data-k="${k}"` : "disabled"} class="${i < idx ? "sx-dn" : i === idx ? "sx-cur" : ""}"${i === idx ? ' aria-current="step"' : ""}>${i < idx ? ICO.check : ""}${l}</button></li>`).join("")}</ol>`;
@@ -1081,9 +1209,20 @@ async function makeApp(j) { // the user did not tick "Add it to my applications"
     jobId: j.id, order: L.length + 1, notes: "", nextAction: "", updatedAt: FS.serverTimestamp() });
   return ref.id;
 }
+// 2.49.1 Stuart's method on screen: who the employer is, the angle and the bridge, then every line of the advertisement in its order
+const RATE_CLS = { "met": "ok", "partly met": "part", "not met": "no" };
+function whyYouHTML(a) {
+  const br = a.bridge && typeof a.bridge === "object" ? a.bridge : null, rows = (Array.isArray(a.matchTable) ? a.matchTable : []).filter((r) => r && r.line);
+  if (!a.angle && !(br && br.fact) && !rows.length) return ""; // fit checks made before 2.49.0 have none of this
+  const cnt = (k) => rows.filter((r) => String(r.rating || "").toLowerCase() === k).length;
+  const sum = [["met", "met"], ["partly met", "partly met"], ["not met", "not met"]].map(([k, l]) => cnt(k) ? cnt(k) + " " + l : "").filter(Boolean).join(" · ");
+  const why = a.angle || (br && br.fact) || a.employer ? `<h3>Why you, for this job</h3><div class="kv">${a.employer ? `<div class="k">The employer</div><div class="v">${esc(a.employer)}</div>` : ""}${a.angle ? `<div class="k">Your angle</div><div class="v"><b>${esc(a.angle)}</b></div>` : ""}<div class="k">The bridge</div><div class="v">${br && br.fact ? esc(br.fact) + (br.why ? "<br>" + esc(br.why) : "") + "<br><i>Stuart opens your profile with the angle and puts the bridge in the profile and the letter's first evidence paragraph.</i>" : "<i>Stuart found nothing in your record close to this employer's business. Tell Stuart in the chat if you have something.</i>"}</div></div>` : "";
+  const tbl = rows.length ? `<h3>How you match the advertisement</h3><p class="sx-sp sm">Every line of the advertisement, in its own order. That order is the employer's priority.${sum ? " " + esc(sum) + "." : ""}</p><ol class="sx-mt">${rows.map((r) => { const rt = String(r.rating || "Not met"), c = RATE_CLS[rt.toLowerCase()] || "no"; return `<li><div class="mt-b"><small>${esc(r.kind || "")}</small><b>${esc(r.line)}</b>${r.evidence ? `<span>${esc(r.evidence)}</span>` : ""}${r.gap ? `<i>Gap: ${esc(r.gap)}</i>` : ""}</div><em class="mt-r ${c}">${esc(rt)}</em></li>`; }).join("")}</ol>` : "";
+  return why + tbl + `<p class="sx-sp sm">Something wrong? Tell Stuart in the chat before you build, for example "I did work with an outsourced partner in 2022".</p>`;
+}
 function fitDetail(a) {
   const li = (arr, fn) => (arr || []).map(fn).join(""), ats = a.ats || {};
-  return `<div class="sx-fd"><h3>Hard screens</h3><div class="kv">${li(a.hardScreens, (h) => `<div class="k">${esc(h.status)}</div><div class="v"><b>${esc(h.requirement)}</b>${h.evidence ? "<br>" + esc(h.evidence) : ""}${h.gap ? "<br><i>Gap: " + esc(h.gap) + "</i>" : ""}</div>`) || '<div class="v">None listed</div>'}</div>
+  return `<div class="sx-fd">${whyYouHTML(a)}<h3>Hard screens</h3><div class="kv">${li(a.hardScreens, (h) => `<div class="k">${esc(h.status)}</div><div class="v"><b>${esc(h.requirement)}</b>${h.evidence ? "<br>" + esc(h.evidence) : ""}${h.gap ? "<br><i>Gap: " + esc(h.gap) + "</i>" : ""}</div>`) || '<div class="v">None listed</div>'}</div>
   ${(a.transferable || []).filter((t) => t && t.requirement && t.evidence).length ? `<h3>Transferable skills</h3><p class="sx-sp sm">You have shown these in a different setting. Lead with the skill, then name the setting honestly.</p><div class="kv">${li(a.transferable.filter((t) => t && t.requirement && t.evidence), (t) => `<div class="k">Transferable</div><div class="v"><b>${esc(t.requirement)}</b><br>${esc(t.evidence)}${t.difference ? "<br><i>Different setting: " + esc(t.difference) + "</i>" : ""}${t.say ? "<br>How to say it: " + esc(t.say) : ""}</div>`)}</div>` : ""}
   <h3>Keywords</h3><div class="kv"><div class="k">In your CV</div><div class="v">${li(ats.must, (t) => `<div><b>${esc(t.term)}</b>: ${esc(t.evidence)}</div>`) || "None"}</div><div class="k">Nice to have</div><div class="v">${li(ats.nice, (t) => `<div><b>${esc(t.term)}</b>: ${esc(t.evidence)}</div>`) || "None"}</div><div class="k">Missing</div><div class="v">${li(ats.gap, (t) => `<div><b>${esc(t.term)}</b>: ${esc(t.why)}</div>`) || "None"}</div></div>
   ${(a.nextSteps || []).filter(Boolean).length ? `<h3>Next steps</h3><ol>${li(a.nextSteps.filter(Boolean), (s) => `<li>${esc(s)}</li>`)}</ol>` : ""}</div>`;
@@ -1281,7 +1420,8 @@ function pdfBuild(J, html, name) {
 }
 async function pdfSave(blob, name) {
   const file = new File([blob], name + ".pdf", { type: "application/pdf" });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+  // 2.50.1 files only: with a title as well, iOS "Save to Files" saved a second file holding the title
+  if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file] }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
   const url = URL.createObjectURL(blob), a = document.createElement("a"); a.href = url; a.download = name + ".pdf"; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 4000);
 }
 function printDoc(kind, look) {
@@ -1314,13 +1454,13 @@ function saveB64(name, b64) {
 function setPath(o, path, v) { const p = path.split("."); let x = o; for (let i = 0; i < p.length - 1; i++) { const k = /^\d+$/.test(p[i]) ? Number(p[i]) : p[i]; if (x[k] == null) x[k] = {}; x = x[k]; } x[p[p.length - 1]] = v; }
 function ensureDraft() { if (!state.cvDraft) state.cvDraft = clone(state.cv); return state.cvDraft; }
 let pvT = null;
-function refreshPreview() { clearTimeout(pvT); pvT = setTimeout(() => { const c = draft(), b = document.getElementById("sx-pvb"), pg = document.getElementById("sx-pages"); if (b) b.innerHTML = docHTML(c, "cv"); if (pg) { const n = estPages(c, "cv"); pg.textContent = "about " + n + " of 6 pages"; pg.className = "sx-pc " + (n > 6 ? "warn" : "ok"); } }, 150); }
+function refreshPreview() { clearTimeout(pvT); pvT = setTimeout(() => { const c = draft(), b = document.getElementById("sx-pvb"), pg = document.getElementById("sx-pages"); if (b) b.innerHTML = docHTML(c, "cv"); if (pg) { const n = estPages(c, "cv"); pg.textContent = pagesText(c, n); pg.className = "sx-pc " + (n > pageCap(c) ? "warn" : "ok"); } }, 150); }
 function cvDirtyHTML(c) { return `<div class="wr-st"><i class="w"></i><b>Unsaved changes</b></div><div class="sx-sv2"><button type="button" class="btn btn--ghost sx-b sm" data-stu="cv-discard">Discard</button><button type="button" class="btn sx-b sm" data-stu="cv-save">Save as version ${esc(nextVer(c.version))}</button></div>`; }
 function markDirty() { if (!state.cvDirty) { state.cvDirty = true; const s = document.querySelector(".wr"), st = s && s.querySelector(".sx-st0"); if (st) { s.classList.add("dirty"); st.innerHTML = cvDirtyHTML(draft()); } } }
 async function cvSave(quiet) {
   const c = ensureDraft(); c.version = nextVer(state.cv ? c.version : "0.9"); if (!state.cv) c.version = "1.0";
   c.experience = (c.experience || []).map((r) => ({ ...r, bullets: (r.bullets || []).filter((b) => hasText(b.text)) }));
-  LISTS.forEach((k) => { c[k] = (c[k] || []).filter((x) => hasText(x.text)); });
+  ["education"].concat(CV_KEYS).forEach((k) => { if (Array.isArray(c[k])) c[k] = c[k].filter((x) => hasText(x.text)); }); (c.own || []).forEach((o) => { o.items = (o.items || []).filter((x) => hasText(x.text)); });
   if (ctx.mode === "local") { state.cv = clone(c); state.cvDraft = null; state.cvDirty = false; render(); if (ctx.toast) ctx.toast("Master CV saved as v" + c.version); return; }
   try { await ctx.FS.setDoc(ctx.FS.doc(ctx.db, "users", ctx.user.uid, "cv", "master"), { ...c, updatedAt: ctx.FS.serverTimestamp() }); state.cvDraft = null; state.cvDirty = false; if (ctx.toast && !quiet) ctx.toast("Master CV saved as v" + c.version); }
   catch (e) { state.err = "Could not save the CV (" + (e.code || e.message) + ")."; render(); }
@@ -1465,11 +1605,27 @@ async function hubClick(act, t) {
     case "sec": state.cvSec = t.dataset.k; render(); return true;
     case "role": state.cvItem = n("i"); render(); return true;
     case "role-add": { const c = ensureDraft(); c.experience = c.experience || []; c.experience.unshift({ id: rid(), title: "", org: "", location: "", start: "", end: "", bullets: [{ text: "" }] }); state.cvItem = 0; state.cvDirty = true; render(); return true; }
-    case "role-del": { const c = ensureDraft(), r = c.experience[n("i")]; if (!r) return true; if (ctx.confirm && !(await ctx.confirm("Remove " + (r.title || "this role") + " from your master CV? Nothing is saved until you press Save.", { ok: "Remove", danger: true }))) return true; c.experience.splice(n("i"), 1); state.cvItem = 0; state.cvDirty = true; render(); return true; }
+    case "role-del": { const c = ensureDraft(), r = c.experience[n("i")]; if (!r) return true; if (ctx.confirm && !(await ctx.confirm("Remove " + (r.title || "this role") + " from your master CV? Nothing is saved until you press Save.", { ok: "Remove", danger: true }))) return true; const di = n("i"); c.experience.splice(di, 1); state.cvItem = Math.max(0, Math.min(state.cvItem - (di < state.cvItem ? 1 : 0), c.experience.length - 1)); state.cvDirty = true; render(); return true; }
     case "bul-add": { const c = ensureDraft(); c.experience[n("i")].bullets.push({ text: "" }); state.cvDirty = true; render(); const L = ctx.container.querySelectorAll(".sx-bul textarea"); if (L.length) L[L.length - 1].focus(); return true; }
     case "bul-del": { const c = ensureDraft(); c.experience[n("i")].bullets.splice(n("j"), 1); state.cvDirty = true; render(); return true; }
-    case "li-add": { const c = ensureDraft(), k = t.dataset.k; c[k] = c[k] || []; c[k].push({ text: "" }); state.cvDirty = true; render(); const L = ctx.container.querySelectorAll(".sx-bul input"); if (L.length) L[L.length - 1].focus(); return true; }
-    case "li-del": { const c = ensureDraft(); c[t.dataset.k].splice(n("j"), 1); state.cvDirty = true; render(); return true; }
+    case "li-add": { const c = ensureDraft(), k = t.dataset.k; secItems(c, k, true).push({ text: "" }); state.cvDirty = true; render(); const L = ctx.container.querySelectorAll(".sx-bul input"); if (L.length) L[L.length - 1].focus(); return true; }
+    case "li-del": { const c = ensureDraft(); secItems(c, t.dataset.k).splice(n("j"), 1); state.cvDirty = true; render(); return true; }
+    // 2.50.0 sections: add, move, set when they go on tailored documents, remove
+    case "sec-menu": state.secMenu = !state.secMenu; render(); return true;
+    case "sec-new": { const c = ensureDraft(), L = (c.layout = c.layout || {}), ord = (L.order = cvSecs(c).map((s) => s.key)); let k = t.dataset.k;
+      if (k === "own") { const id = rid(); c.own = c.own || []; c.own.push({ id, heading: "Your heading", items: [{ text: "" }] }); k = "own:" + id; }
+      else { secItems(c, k, true); if (!c[k].length) c[k].push({ text: "" }); (L.off = L.off || {})[k] = false; }
+      if (!ord.includes(k)) ord.push(k); state.secMenu = false; state.cvSec = k; state.cvDirty = true; render(); return true; }
+    case "sec-move": { const c = ensureDraft(), L = (c.layout = c.layout || {}), ord = (L.order = cvSecs(c).map((s) => s.key)), i = ord.indexOf(t.dataset.k), j = i + Number(t.dataset.d);
+      if (i >= 0 && j >= 0 && j < ord.length) { [ord[i], ord[j]] = [ord[j], ord[i]]; state.cvDirty = true; render(); } return true; }
+    case "sec-mode": { const c = ensureDraft(), L = (c.layout = c.layout || {}); (L.mode = L.mode || {})[t.dataset.k] = t.dataset.m; /* data-m: the app treats data-v as a page link */ state.cvDirty = true; render(); return true; }
+    case "sec-del": { const c = ensureDraft(), k = t.dataset.k, s = cvSecs(c).find((x) => x.key === k); if (!s) return true;
+      if (secText(s).length && ctx.confirm && !(await ctx.confirm("Remove " + s.own + " and its " + secText(s).length + " entries from your master CV? Nothing is saved until you press Save.", { ok: "Remove", danger: true }))) return true;
+      if (k.startsWith("own:")) c.own.splice(s.idx, 1); else delete c[k];
+      const L = c.layout || {}; if (Array.isArray(L.order)) L.order = L.order.filter((x) => x !== k); ["heading", "printOwn", "off", "mode"].forEach((f) => { if (L[f]) delete L[f][k]; });
+      state.cvSec = "experience"; state.cvDirty = true; render(); return true; }
+    case "imp-x": state.imp = null; render(); return true;
+    case "imp-ok": await finishImport(); return true;
     case "iv-open": state.ivOpen = true; state.tab = "cv"; state.pvOpen = false; if (ctx.mode === "local" && !state.iv) state.iv = null; render(); window.scrollTo({ top: 0 }); return true;
     case "iv-close": state.ivOpen = false; render(); return true;
     case "iv-reset": { if (ctx.confirm && !(await ctx.confirm("Start the interview again? Your answers and the draft so far are cleared. Your master CV is not affected.", { ok: "Start again", danger: true }))) return true;
@@ -1495,7 +1651,7 @@ async function hubClick(act, t) {
       const d = clone(ivPreviewDoc()); if (!(d.experience || []).length && !d.name) { state.err = "There is nothing in the draft yet."; render(); return true; }
       if (state.cv && ctx.confirm && !(await ctx.confirm("Replace your master CV (v" + (state.cv.version || "1.0") + ") with the interview draft? Nothing is saved until you press Save in the CV builder.", { ok: "Use the draft" }))) return true;
       (d.experience || []).forEach((r) => (r.bullets || []).forEach((b) => { b.src = "interview"; })); // unsourced flags stay until the user edits the line
-      state.cvDraft = Object.assign({ version: (state.cv && state.cv.version) || "1.0", contact: {}, headline: "", summary: "", experience: [], education: [], skills: [], certifications: [], awards: [], publications: [], referees: [] }, d);
+      state.cvDraft = Object.assign({ version: (state.cv && state.cv.version) || "1.0", contact: {}, headline: "", summary: "", experience: [], education: [], skills: [], referees: [] }, d);
       state.cvDirty = true; state.ivOpen = false; state.cvSec = "summary"; render();
       if (ctx.mode !== "local") ctx.FS.setDoc(ctx.FS.doc(ctx.db, "users", ctx.user.uid, "cv", "interview"), { used: true }, { merge: true }).catch(() => {});
       if (ctx.toast) ctx.toast("Draft moved to the CV builder. Check it, then press Save."); return true; }
@@ -1653,7 +1809,7 @@ async function hubClick(act, t) {
       state.qk = { kind: t.dataset.kind, ctx: "", paste: "", src: "general", review: false }; state.err = ""; state.pvOpen = false; if (IOS) loadJsPdf().catch(() => {}); render(); window.scrollTo({ top: 0 }); return true; }
     case "qk-back": state.qk = null; state.err = ""; render(); window.scrollTo({ top: 0 }); return true;
     case "qk-look": if (state.qk) { state.qk.lookId = t.dataset.id; render(); } return true;
-    case "qk-src": if (state.qk) { state.qk.src = t.dataset.v; render(); } return true;
+    case "qk-src": if (state.qk) { state.qk.src = t.dataset.m; render(); } return true; /* 2.50.0 data-m: data-v is the app's page link */
     case "qk-review": if (state.qk) { state.qk.review = true; render(); const c = ctx.container.querySelector(".sx-rv [data-stu=qk-review-x]"); if (c) c.focus(); } return true;
     case "qk-review-x": if (state.qk) { state.qk.review = false; render(); } return true;
     case "qk-make": {
@@ -1780,6 +1936,12 @@ document.addEventListener("input", (e) => {
     state.email[{ "em-to": "to", "em-sub": "subject", "em-body": "body" }[el.id]] = el.value; state.email.dirty = true;
     if (el.id === "em-to") { const ok = EMAIL_OK.test(el.value.trim()); ctx.container.querySelectorAll('[data-stu="em-send"]').forEach((x) => { x.disabled = !ok; }); const w = document.getElementById("em-warn"); if (w) w.hidden = ok; }
     return; }
+  if (el.dataset && el.dataset.imp != null && state.imp) { const r = state.imp.rows[Number(el.dataset.imp)]; if (r) { r.use = el.value; r.asked = true; render(); } return; }
+  if (el.dataset && el.dataset.lay) { // 2.50.0 section settings and the preset
+    const c = ensureDraft(), L = (c.layout = c.layout || {}), k = el.dataset.k, f = el.dataset.lay;
+    if (f === "preset") L.preset = el.value; else if (f === "heading") (L.heading = L.heading || {})[k] = el.value.trim();
+    else if (f === "print") (L.printOwn = L.printOwn || {})[k] = el.value === "own"; else if (f === "off") (L.off = L.off || {})[k] = !!el.checked;
+    markDirty(); if (f === "heading") refreshPreview(); else render(); return; }
   if (el.dataset && el.dataset.cv) { const c = ensureDraft(), path = el.dataset.cv; if (path === "skills") c.skills = el.value.split(",").map((x) => x.trim()).filter(Boolean); else setPath(c, path, el.value);
     // editing a flagged line is the user's own check of it
     if (/\.bullets\.\d+\.text$/.test(path)) setPath(c, path.replace(/\.text$/, ".unsourced"), false);
@@ -1796,11 +1958,10 @@ document.addEventListener("change", async (e) => {
     if (id === "lo-job") { const b = buildOf(state.buildJob); if (!b) return; b.lookId = e.target.value; render(); if (ctx.mode !== "local") { try { await ctx.FS.updateDoc(ctx.FS.doc(ctx.db, "users", ctx.user.uid, "builds", b.jobId), { lookId: b.lookId }); } catch (x) { state.err = "Could not save that (" + (x.code || x.message) + ")."; render(); } } return; } }
   if (e.target.id === "stu-track" && state.sheet) { state.sheet.track = e.target.checked; return; }
   if (e.target.id === "stu-ad" && state.sheet) { const f = e.target.files[0]; state.sheet.file = f || null; state.sheet.fileName = f ? f.name : ""; state.sheet.err = ""; render(); return; }
+  if (ctx.mode === "local" && e.target.id === "stu-cv") { state.profile = Object.assign({}, state.profile, { profile: clone(DEMO_IMPORT) }); openImport(!!state.cv); e.target.value = ""; return; } // preview: a sample CV, no AI call
   if (ctx.mode === "local") return;
   if (e.target.id === "stu-cv") { const f = e.target.files[0]; if (!f) return; const had = !!state.cv;
     try { const file = await readFile(f); const r = await call("stuartProfile", { file }, "Stuart is reading your CV…");
-      if (r && r.profile) state.profile = Object.assign({}, state.profile, { profile: r.profile });
-      if (!had) { state.cvDraft = masterFromProfile(); state.cvDirty = true; await cvSave(true); state.tab = "cv"; state.cvSec = "experience"; render(); if (ctx.toast) ctx.toast("Stuart read your CV and saved it as your master CV (v1.0). Check each section."); }
-      if (had && ctx.confirm && await ctx.confirm("Stuart has read the new file. Replace your master CV with it? You can review everything before you save.", { ok: "Review and replace" })) { const old = state.cv || {}; state.cvDraft = Object.assign(masterFromProfile(), { contact: old.contact || {}, version: old.version || "1.0", referees: old.referees || [] }); state.cvDirty = true; state.tab = "cv"; render(); }
+      if (r && r.profile) { state.profile = Object.assign({}, state.profile, { profile: r.profile }); openImport(had); } // 2.50.0 the review comes first
     } catch (err) { state.err = err.message || String(err); render(); } e.target.value = ""; }
 });

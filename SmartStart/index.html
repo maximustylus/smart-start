@@ -462,16 +462,29 @@ body.wm-on .sx-a4,body.wm-on .win__body{background-image:var(--wm);background-re
 .sx-sec{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:40px;padding:0 10px;border:0;border-radius:10px;background:none;color:var(--fg);font:500 14px var(--font);text-align:left;cursor:pointer}
 .sx-sec[aria-pressed="true"]{background:var(--pill);font-weight:700}
 .sx-sd{width:8px;height:8px;border-radius:50%;flex:none}.sx-sd.done{background:var(--tl-g)}.sx-sd.todo{background:var(--tl-a)}.sx-sd.off{background:var(--cd-track)}
-@media (max-width:1023.98px){.sx-secs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:6px}.sx-secs .sx-k{display:none}.sx-sec{flex:none;width:auto;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--card-solid)}.sx-sec[aria-pressed="true"]{background:var(--fg);color:var(--bg)}}
+.sx-sec small{margin-left:6px;font-size:11px;font-weight:500;color:var(--muted)}
+.sx-grp{font:600 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 10px 2px}
+.sx-pre{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;margin:2px 0 4px;border:1px solid var(--line);border-radius:10px;font-size:13px}.sx-pre select{border:0;background:none;color:var(--green);font:700 13px var(--font);text-align:right;cursor:pointer;min-width:0}
+.sx-secs>.sx-add{justify-self:start;margin-top:6px}
+.sx-menu{display:grid;gap:1px;margin-top:6px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--card-solid)}.sx-menu button{text-align:left;min-height:36px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--fg);font:500 13.5px var(--font);cursor:pointer}.sx-menu button:hover,.sx-menu button:focus-visible{background:var(--pill)}
+.sx-mv{display:flex;gap:4px}.sx-ib{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:none;color:var(--fg);font:600 15px var(--font);cursor:pointer}
+.sx-seg{display:flex;flex-wrap:wrap;gap:6px}.sx-seg button{min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:none;color:var(--fg);font:500 13px var(--font);cursor:pointer}.sx-seg button[aria-pressed="true"]{border-color:var(--green);color:var(--green);font-weight:700}
+.sx-chk{display:flex;align-items:center;gap:8px;font-size:14px;margin:8px 0}.sx-chk input{width:18px;height:18px;accent-color:var(--green)}
+.sx-imp{overflow-x:auto}.sx-imp table{width:100%;border-collapse:collapse;font-size:13.5px}.sx-imp th,.sx-imp td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.sx-imp th{font:600 11.5px var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.sx-imp .n{text-align:right;color:var(--muted);white-space:nowrap}
+.sx-imp select{max-width:100%;min-height:34px;border:1px solid var(--line);border-radius:8px;background:var(--card-solid);color:var(--fg);font:500 13px var(--font);padding:0 6px}.sx-imp tr.ask td:first-child{color:var(--warn)}.sx-imp tr.ask small{display:block;font-size:12px;margin-top:2px}
+@media (max-width:1023.98px){.sx-secs{display:flex;flex-wrap:wrap;gap:6px;padding:8px}.sx-secs .sx-k,.sx-secs .sx-grp{display:none}.sx-pre,.sx-menu,.sx-secs>.sx-sp{flex:1 1 100%}.sx-sec{flex:none;width:auto;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--card-solid)}.sx-sec[aria-pressed="true"]{background:var(--fg);color:var(--bg)}}
 .sx-ed{padding:16px 18px;display:grid;gap:12px;min-width:0;align-content:start}
 .sx-fg{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
 .sx-f{display:grid;gap:4px;min-width:0}.sx-f.wide{grid-column:1/-1}.sx-f>span{font:600 12px var(--font);color:var(--muted)}
 .sx-f input,.sx-f textarea,.sx-f select,.sx-bul textarea,.sx-bul input{width:100%;min-height:42px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--card-solid);color:var(--fg);font:15px/1.45 var(--font);resize:vertical}
 @media (max-width:560px){.sx-fg{grid-template-columns:minmax(0,1fr)}}
-.sx-roles{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
-.sx-roles button{flex:none;display:grid;text-align:left;gap:1px;max-width:220px;padding:7px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card-solid);color:var(--fg);font:700 13px/1.25 var(--font);cursor:pointer}
-.sx-roles button span{font-weight:400;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sx-roles button[aria-pressed="true"]{border-color:var(--green);box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 25%,transparent)}
+.sx-rhd{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.sx-rhd .sx-k{margin:0}
+.sx-roles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:6px;max-height:min(46vh,300px);overflow-y:auto;padding:3px;margin:10px -3px 4px}
+.sx-rc{position:relative;min-width:0}
+.sx-rc>button[data-stu="role"]{width:100%;height:100%;display:grid;align-content:start;text-align:left;gap:2px;padding:7px 32px 7px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card-solid);color:var(--fg);font:700 13px/1.25 var(--font);cursor:pointer}
+.sx-rc>button span{font-weight:400;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sx-rc>button[aria-pressed="true"]{border-color:var(--green);box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 25%,transparent)}
+.sx-rx{position:absolute;top:4px;right:4px;width:26px;height:26px;display:grid;place-items:center;border:0;border-radius:8px;background:none;color:var(--muted);cursor:pointer}.sx-rx:hover,.sx-rx:focus-visible{color:var(--crit);background:var(--pill)}.sx-rx .ic{width:14px;height:14px}
 .sx-add{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 10px;border:1px dashed var(--line);border-radius:10px;background:none;color:var(--ok);font:700 13px var(--font);cursor:pointer;flex:none}
 .sx-add .ic{width:14px;height:14px}
 .sx-bul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
@@ -789,6 +802,11 @@ main:has(.sx-jh) #view>.sx-back{display:flex;width:min(760px,100%);margin-left:a
 .sx-ql{margin:0 0 10px;padding-left:18px;display:grid;gap:6px;font-size:14px}
 .sx-det summary{cursor:pointer;font:700 13.5px var(--font);color:var(--muted);min-height:40px;display:flex;align-items:center}
 .sx-fd h3{font:600 12px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
+.sx-mt{list-style:none;counter-reset:mt;display:grid;gap:6px;margin:6px 0 10px;padding:0}
+.sx-mt li{counter-increment:mt;display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:4px 10px;align-items:start;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:var(--card-solid)}
+.sx-mt li::before{content:counter(mt);color:var(--muted);font-weight:700}
+.sx-mt .mt-b{display:grid;gap:2px;min-width:0}.sx-mt small{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.sx-mt .mt-b span{color:var(--muted);font-size:13px}.sx-mt .mt-b i{font-size:13px}
+.mt-r{padding:2px 8px;border:1px solid currentColor;border-radius:999px;font:700 11px/1.5 var(--font);font-style:normal;white-space:nowrap}.mt-r.ok{color:var(--green)}.mt-r.part{color:var(--warn,#e0a23a)}.mt-r.no{color:var(--crit)}
 .sx-done{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.sx-done .sx-tx{flex:1;min-width:200px}
 .sx-delw{display:flex;justify-content:center;margin-top:18px}
 #view .sx-del{position:static;display:flex;align-items:center;justify-content:center;width:auto;max-width:100%;height:auto;min-height:44px;margin:0;padding:0 16px;border:0;background:none;color:var(--crit);font:700 14px var(--font);white-space:normal;cursor:pointer;border-radius:999px}#view .sx-del:hover{background:color-mix(in srgb,var(--crit) 10%,transparent)}
@@ -938,6 +956,17 @@ button.wev{cursor:pointer}
 .rv-p .spin{display:inline-block;vertical-align:-2px;margin-right:6px}.rv-p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.45}.rv-go{justify-self:start}.rv-m{margin:0}.rv-bs{display:grid;gap:7px}.rv-b{display:grid;grid-template-columns:minmax(120px,170px) minmax(0,1fr) 26px;align-items:center;gap:10px;font-size:13px}.rv-b span{color:var(--muted)}.rv-b i{height:8px;border-radius:99px;background:var(--pill);overflow:hidden}.rv-b u{display:block;height:100%;border-radius:99px;background:var(--st-open)}.rv-b.b u{background:var(--st-int)}.rv-b.c u{background:var(--st-offer)}.rv-b b{text-align:right}
 .rv-lv{width:100%;border-collapse:collapse;font-size:13.5px}.rv-lv td{padding:4px 0}.rv-lv td:nth-child(2){color:var(--muted);text-align:right;padding-right:16px;white-space:nowrap}.rv-lv td:last-child{font-weight:700;text-align:right;white-space:nowrap;width:1%}
 .rv-o{display:grid;gap:3px;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px;line-height:1.4}.rv-o small{color:var(--muted);font-size:12px}.rv-q{margin:0;padding:10px 12px;border-radius:12px;background:var(--pill);font-size:13.5px;line-height:1.4}.rv-f{margin-top:4px}
+/* 2.50.3 the review card is a snapshot; the full review opens in a sheet */
+.rv-t{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.rv-t div{padding:10px;border-radius:14px;background:var(--pill);min-width:0}.rv-t b{display:block;font-size:22px;line-height:1.1}.rv-t span{display:block;margin-top:3px;font-size:11.5px;line-height:1.25;color:var(--muted)}
+.rv-k{margin:6px 0 0;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.rv-fd{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;border:1px solid var(--line)}.rv-fd i{flex:none;min-width:38px;height:34px;padding:0 5px;border-radius:10px;background:rgba(61,220,138,.14);color:var(--green);display:grid;place-items:center;font-weight:700;font-size:13px;font-style:normal}.rv-fd p{margin:0;font-size:14px;line-height:1.35}.rv-fd small{display:block;margin-top:2px;color:var(--muted);font-size:11.5px}
+.rv-a{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.rv-more,.rv-again{border-radius:999px;padding:9px 16px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;min-height:40px}.rv-more{background:var(--green);color:#06221a;border:0}.rv-again{background:var(--pill);color:var(--fg);border:1px solid var(--line);font-weight:600}
+.rv-o em{font-style:normal;color:var(--green);font-weight:700}
+.rv-lb{position:fixed;inset:0;z-index:85;display:flex;align-items:flex-end;justify-content:center;background:rgba(6,20,14,.6);animation:welIn .2s ease both}
+.rv-sh{width:100%;max-width:640px;max-height:88vh;overflow:auto;overscroll-behavior:contain;padding:14px max(18px,env(safe-area-inset-left,0px)) calc(24px + env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0;background:var(--card-solid);border:1px solid var(--line);color:var(--fg)}
+.rv-g{width:40px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 10px}.rv-sh-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}.rv-sh-h b{font-size:17px}
+.rv-x{width:34px;height:34px;border-radius:50%;border:0;background:var(--pill);color:var(--fg);font-size:15px;cursor:pointer}
+body.rv-open{overflow:hidden}@media (min-width:720px){.rv-lb{align-items:center}.rv-sh{border-radius:22px}}
 @media (min-width:720px){.rv{max-width:none}.rv-bs,.rv-lv{max-width:620px}.rv-o,.rv-q,.rv-p,.rv-f{max-width:760px}}
 .icard .isec{border-top:0;padding-top:0}
 .icard .ih{font:600 12px/1.2 var(--font);letter-spacing:.09em;color:var(--muted);margin-bottom:12px}
@@ -1115,8 +1144,21 @@ body.has-fab .foot{padding-bottom:84px}
 body.ss-busy .iconbtn.stu{box-shadow:0 0 0 2px var(--green)}body.ss-busy .iconbtn.stu::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid transparent;border-top-color:var(--green);animation:spin 1s linear infinite}.iconbtn.stu{position:relative}
 /* 2.25.5: centred with auto margins (the entry animation overwrote a transform, which pushed it right), and really hidden when idle (display:flex beat the hidden attribute, so it never went away) */
 #busytoast[hidden]{display:none}
-#busytoast{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:999px;background:var(--card-solid);color:var(--fg);border:1px solid var(--line);box-shadow:0 6px 24px rgba(0,0,0,.18);font-size:13px;max-width:min(92vw,420px);animation:welIn .25s ease both}
-#busytoast .spin{width:16px;height:16px;flex:none}@media (min-width:900px){#busytoast{bottom:24px}}
+/* 2.50.2 Stuart's working panel sits in the middle of the screen; "Keep working while I wait" shrinks it to the strip at the bottom */
+#busytoast{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;background:rgba(6,20,14,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:welIn .25s ease both}
+#busytoast .bt-c{width:min(88vw,340px);padding:28px 22px 14px;border-radius:24px;background:var(--card-solid);border:1px solid var(--line);box-shadow:0 18px 60px rgba(0,0,0,.35);text-align:center;color:var(--fg)}
+#busytoast .bt-av{position:relative;width:76px;height:76px;margin:0 auto 16px}#busytoast .bt-av img{width:76px;height:76px;border-radius:50%;display:block}
+#busytoast .bt-av::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--green);animation:spin 1s linear infinite}
+#busytoast .bt-tx b{display:block;font-size:17px;line-height:1.35}#busytoast .bt-tx small{display:block;margin-top:6px;font-size:13px;color:var(--muted)}
+#busytoast .bt-bar{height:4px;border-radius:4px;background:var(--line);overflow:hidden;margin:18px 0 6px}#busytoast .bt-bar i{display:block;height:100%;width:40%;border-radius:4px;background:var(--green);animation:btBar 1.4s ease-in-out infinite}
+@keyframes btBar{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+#busymin{background:none;border:0;color:var(--green);font-family:inherit;font-size:14px;font-weight:600;padding:10px 12px;cursor:pointer}
+#busytoast .spin{display:none}
+#busytoast.mini{inset:auto 0 calc(84px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;justify-content:center;padding:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;pointer-events:none}
+#busytoast.mini .bt-c{pointer-events:auto;width:fit-content;max-width:min(92vw,420px);display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.18);text-align:left}
+#busytoast.mini .bt-av,#busytoast.mini small,#busytoast.mini .bt-bar,#busytoast.mini #busymin{display:none}
+#busytoast.mini .spin{display:block;width:16px;height:16px;flex:none}#busytoast.mini .bt-tx b{font-size:13px;font-weight:400}
+@media (min-width:900px){#busytoast.mini{bottom:24px}}@media (prefers-reduced-motion:reduce){#busytoast .bt-bar i,#busytoast .bt-av::after{animation:none}}
 @media (max-width:420px){.stu-scores{grid-template-columns:1fr 1fr}.stu-grid{grid-template-columns:1fr}}
 /* settings */
 .set{padding:14px 16px;border-radius:var(--r-l);background:var(--card);border:1px solid var(--line);margin-bottom:12px}
@@ -1721,7 +1763,7 @@ body.stuhi-on .fab{opacity:0;pointer-events:none}
   </button>
   </div>
 </header>
-<div id="busytoast" role="status" aria-live="polite" hidden><span class="spin"></span><span id="busytxt">Stuart is working…</span></div>
+<div id="busytoast" role="status" aria-live="polite" hidden><div class="bt-c"><div class="bt-av"><img src="icons/stuart.svg" alt=""></div><span class="spin"></span><div class="bt-tx"><b id="busytxt">Stuart is working…</b><small id="busysub"></small></div><div class="bt-bar"><i></i></div><button type="button" id="busymin">Keep working while I wait</button></div></div>
 
 <main id="app">
   <p class="sub" id="sub">Loading…</p>
@@ -1930,7 +1972,7 @@ const ssConfirm=(m,o)=>ssDialog(m,o), ssAlert=m=>ssDialog(m,{alert:true});
 const fmt=iso=>{ if(!iso) return ""; const d=new Date(iso+"T00:00:00"); return isNaN(d)?iso:d.toLocaleDateString("en-GB",{day:"numeric",month:"short"}) };
 const days=iso=>{ if(!iso) return null; return Math.round((TODAY-new Date(iso+"T00:00:00"))/864e5) };
 const isoD=d=>d.toISOString().slice(0,10);
-const APP_VERSION="2.48.1", APP_BUILD="2026-11-15";
+const APP_VERSION="2.50.5", APP_BUILD="2026-11-17";
 let OWNER=false;
 const DRY=params.get("dryrun")==="1", IMPDEMO=MODE==="local"&&params.has("importdemo");
 let LOCAL_RAW=null, TR=null, STM=null, STORE=null, SS=null;
@@ -2116,27 +2158,53 @@ function insReview(){
     return head+'<p class="rv-p">Stuart reads the '+revN(n,"application","applications")+' that closed or went quiet and tells you what it sees. It reports patterns in your own records. It does not know why an employer said no, and it does not tell you what to do.</p>'
       +'<button type="button" class="btn sx-b rv-go" data-act="rev-run">Review my applications</button>'+msg+'<p class="cap">'+split+'</p>';
   }
+  /* 2.50.3 the card is a snapshot: three counts, up to two findings as one-line headlines, and the full review in a pop-up */
+  const E=D.ended||{}, L=D.levels||[], O=D.observations||[], at=revAt(D);
+  const lv=L.filter(x=>x.interviews>0).sort((a,b)=>(b.interviews/b.applied)-(a.interviews/a.applied)||b.applied-a.applied)[0], sent=L.reduce((s,x)=>s+(x.applied||0),0), iv=L.reduce((s,x)=>s+(x.interviews||0),0);
+  const tile=(v,lab)=>'<div><b>'+esc(v)+'</b><span>'+esc(lab)+'</span></div>';
+  const tiles='<div class="rv-t">'+tile(E.before||0,"ended before an interview")+tile(D.quiet||0,"no reply after 30 days")
+    +(lv?tile(lv.interviews+" of "+lv.applied,lv.level+" roles reached interview"):tile(iv+" of "+sent,"sent reached an interview"))+'</div>';
+  const finds=D.small?'<p class="rv-p">Fewer than 5 have closed or gone quiet: too few for a pattern yet.</p>'
+    :O.length?'<div class="rv-k">What Stuart noticed</div>'+O.slice(0,2).map(x=>'<div class="rv-fd"><i>'+esc(x.badge||revBadge(x))+'</i><div><p>'+esc(x.head||revHead(x.text))+'</p><small>'+esc(cap1(x.source||"your records"))+'</small></div></div>').join("")
+    :'<p class="rv-p">Stuart found no pattern that your records support.</p>';
+  const head2='<div class="rv-h"><img src="icons/stuart.svg" alt=""><div><b>Stuart\'s review</b><small>'+revN(D.n||0,"closed or quiet","closed or quiet")+(at?' · '+esc(revDate(at)):'')+'</small></div></div>';
+  return head2+tiles+finds
+    +'<div class="rv-a"><button type="button" class="rv-more" data-act="rev-full">Read the full review</button>'+(REV.busy?'<span class="rv-p" role="status"><span class="spin"></span> Reading…</span>':n?'<button type="button" class="rv-again" data-act="rev-run">Review again</button>':'')+'</div>'+msg;
+}
+const cap1=s=>String(s||"").charAt(0).toUpperCase()+String(s||"").slice(1);
+const revAt=D=>D&&D.at&&D.at.toMillis?D.at.toMillis():D&&typeof D.at==="number"?D.at:0;
+const revDate=t=>new Date(t).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+// a review saved before 2.50.3 has no headline or badge: the first sentence, with its count, at most 70 characters
+function revBadge(x){ const t=String(x.text||""), o=/^(?:the\s+)?(\d+)\s+of\s+(?:the\s+)?(\d+)\b/i.exec(t), a=/^all\s+(?:the\s+)?(\d+)\b/i.exec(t); return o?o[1]+"/"+o[2]:a?a[1]+"/"+a[1]:String(x.n||""); }
+function revHead(text){ let t=String(text||"").split(/(?<=[.?!])\s/)[0].replace(/[.;:,]\s*$/,"").trim();
+  if(t.length>70) t=t.slice(0,70).replace(/\s+\S*$/,"")+"…"; return cap1(t); }
+function revFull(){
+  const D=REV.data; if(!D) return "";
   const E=D.ended||{}, mx=Math.max(1,D.n||0), bar=(lab,v,cls)=>'<div class="rv-b '+cls+'"><span>'+lab+'</span><i><u style="width:'+((v||0)/mx*100).toFixed(1)+'%"></u></i><b>'+(v||0)+'</b></div>';
-  const L=D.levels||[], O=D.observations||[], Q=D.questions||[];
-  const at=D.at&&D.at.toMillis?D.at.toMillis():typeof D.at==="number"?D.at:0;
-  return head
+  const L=D.levels||[], O=D.observations||[], Q=D.questions||[], at=revAt(D);
+  const lead=t=>{ const e=esc(t), m=/^((?:all |the )?\d+(?: of (?:the )?\d+)?)/i.exec(e); return m?'<em>'+m[1]+'</em>'+e.slice(m[1].length):e; };
+  return (D.small?'<p class="rv-p">Fewer than 5 applications have closed or gone quiet. That is too few to show a pattern, so these are the counts only.</p>'
+      :'<h3 class="ih">What Stuart noticed</h3>'+(O.length?O.map(x=>'<div class="rv-o"><span>'+lead(x.text)+'</span><small>From '+esc(x.source)+(x.n?' · '+revN(x.n,"application","applications"):'')+'</small></div>').join(""):'<p class="rv-p">Stuart found no pattern that your records support.</p>')
+        +(Q.length?'<h3 class="ih">Questions you might ask yourself</h3>'+Q.map(x=>'<p class="rv-q">'+esc(x)+'</p>').join(""):''))
     +'<h3 class="ih">Where they ended</h3><div class="rv-bs" role="img" aria-label="Before an interview '+(E.before||0)+', after a first interview '+(E.first||0)+', after a later interview '+(E.later||0)+'">'+bar("Before an interview",E.before,"a")+bar("After a first interview",E.first,"b")+bar("After a later interview",E.later,"c")+'</div>'
     +(L.length?'<h3 class="ih">Outcomes by level</h3><table class="rv-lv"><thead class="sr-only"><tr><th scope="col">Level</th><th scope="col">Sent</th><th scope="col">Reached an interview</th></tr></thead><tbody>'+L.map(x=>'<tr><td>'+esc(x.level)+'</td><td>'+esc(x.applied)+' sent</td><td>'+revN(x.interviews||0,"interview","interviews")+'</td></tr>').join("")+'</tbody></table>'
       +'<p class="cap">Every application you sent, by the level its title shows.'+(L.length===1?' Only one level is on record, so there is nothing to compare yet.':'')+'</p>':'')
-    +(D.small?'<p class="rv-p">Fewer than 5 applications have closed or gone quiet. That is too few to show a pattern, so these are the counts only.</p>'
-      :'<h3 class="ih">What Stuart noticed</h3>'+(O.length?O.map(x=>'<div class="rv-o"><span>'+esc(x.text)+'</span><small>From '+esc(x.source)+'</small></div>').join(""):'<p class="rv-p">Stuart found no pattern that your records support.</p>')
-        +(Q.length?'<h3 class="ih">Questions you might ask yourself</h3>'+Q.map(x=>'<p class="rv-q">'+esc(x)+'</p>').join(""):''))
     +'<p class="cap rv-f">Based on '+revN(D.n||0,"application","applications")+': '+revN(D.unsuccessful||0,"unsuccessful","unsuccessful")+' and '+(D.quiet||0)+' with no reply after 30 days.'+(D.noFit?' '+D.noFit+' had no fit check and count towards stages only.':'')
-      +' Withdrawn and Role closed are left out. '+(D.small?'':'A small number, so read these as observations, not conclusions. ')+'Stuart sees your records, not the employer\'s reasons. The organisation field is not sent, and its name is removed from what the AI reads.'+(at?' Reviewed '+esc(new Date(at).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}))+'.':'')+'</p>'
-    +(REV.busy?'<p class="rv-p" role="status"><span class="spin"></span> Stuart is reading your applications…</p>':n?'<button type="button" class="btn btn--ghost sx-b sm rv-go" data-act="rev-run">Review again</button>':'')+msg;
+      +' Withdrawn and Role closed are left out. '+(D.small?'':'A small number, so read these as observations, not conclusions. ')+'Stuart sees your records, not the employer\'s reasons. The organisation field is not sent, and its name is removed from what the AI reads.'+(at?' Reviewed '+esc(revDate(at))+'.':'')+'</p>';
 }
+function revOpen(){ revClose(); const d=document.createElement("div"); d.id="revlb"; d.className="rv-lb";
+  d.innerHTML='<div class="rv-sh" role="dialog" aria-modal="true" aria-label="Stuart\'s review"><div class="rv-g"></div><div class="rv-sh-h"><b>Stuart\'s review</b><button type="button" class="rv-x" data-act="rev-close" aria-label="Close">✕</button></div><div class="rv">'+revFull()+'</div></div>';
+  d.addEventListener("click",e=>{ if(e.target===d) revClose(); }); document.body.appendChild(d); document.body.classList.add("rv-open");
+  const x=d.querySelector(".rv-x"); if(x) x.focus(); document.addEventListener("keydown",revEsc); }
+function revClose(){ const d=document.getElementById("revlb"); if(d) d.remove(); document.body.classList.remove("rv-open"); document.removeEventListener("keydown",revEsc); }
+function revEsc(e){ if(e.key==="Escape") revClose(); }
 function revPaint(){ const el=$("#rev"); if(el) el.innerHTML=insReview(); }
 async function revLoad(){ if(REV.loaded||MODE==="local"||!USER||!FSMOD) return; REV.loaded=true;
   try{ const d=await FSMOD.getDoc(FSMOD.doc(DB,"users",USER.uid,"meta","review")); if(d.exists()&&!REV.data){ REV.data=d.data(); revPaint(); } }catch(e){} }
 async function revRun(){ if(REV.busy) return; REV.busy=true; REV.msg=""; revPaint();
   try{
     if(MODE==="local"){ await new Promise(r=>setTimeout(r,600)); REV.data={n:12,unsuccessful:8,quiet:4,noFit:2,small:false,at:Date.now(),ended:{before:9,first:2,later:1},levels:[{level:"Senior Executive or Specialist",applied:8,interviews:0},{level:"Executive or Specialist",applied:4,interviews:3}],
-      observations:[{text:"6 of the 8 senior roles asked for a second language, marked unmet.",source:"hard screens and level",n:6},{text:"All 4 with no reply were sent through job portals.",source:"channel",n:4}],questions:["Is the second language something you have but have not written down, or a real gap?"]}; }
+      observations:[{text:"6 of the 8 senior roles asked for a second language, marked unmet. None of the 8 reached an interview.",head:"Senior roles: a second language, marked unmet",badge:"6/8",source:"hard screens and level",n:6},{text:"All 4 with no reply were sent through job portals.",source:"channel",n:4}],questions:["Is the second language something you have but have not written down, or a real gap?"]}; }
     else{ if(!REVFN){ const F=await import("https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js"); REVFN=F.httpsCallable(F.getFunctions(APP,"asia-southeast1"),"stuartReview",{timeout:180000}); }
       REV.data=(await REVFN({})).data||null; }
   }catch(e){ REV.msg=(e&&e.message&&!/^internal$/i.test(e.message))?e.message:"Stuart could not be reached. Try again."; }
@@ -3225,6 +3293,8 @@ document.addEventListener("click",async e=>{
   if(act==="theme"){ const v=t.dataset.t; if(v==="system") delete root.dataset.theme; else root.dataset.theme=v; try{ if(v==="system") localStorage.removeItem("ss-theme"); else localStorage.setItem("ss-theme",v);}catch(x){} syncIcons(); document.querySelectorAll('[data-act="theme"]').forEach(b=>{ const on=b.dataset.t===v; b.classList.toggle("on",on); b.setAttribute("aria-pressed",on); }); return; }
   if(act==="admin"){ view="admin"; render(); scrollTo({top:0,behavior:"instant"}); return; } if(act==="admin-x"){ view="settings"; SET.p=""; render(); scrollTo({top:0,behavior:"instant"}); return; }
   if(act==="rev-run") return revRun();
+  if(act==="rev-full") return revOpen();
+  if(act==="rev-close") return revClose();
   if(act==="sec-open") return secOpen(); if(act==="sec-x") return secClose(); if(act==="sec-ai") return secAI(); if(act==="sec-save") return secSave();
   if(act==="feedback") return openFeedback(); if(act==="fb-x") return closeFeedback(); if(act==="fb-k") return fbKind(t.dataset.k); if(act==="fb-send") return sendFeedback();
   if(act==="add") return $("#fab").click();

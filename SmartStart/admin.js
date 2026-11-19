@@ -13,7 +13,7 @@ const ui = { range: 30, leaveOut: true };
 
 function demo() {
   const now = Date.now(), D = 864e5, days = [];
-  for (let i = 12; i >= 0; i--) { const v = (i * 7) % 5 + 1; days.push({ date: day(now - i * D), others: { fns: { stuartCoach: { calls: v * 6, errors: i === 0 ? 1 : 0 }, stuartAnalyse: { calls: v, errors: 0 } }, kinds: { coach: { calls: v * 6, tokens: v * 50000, usd: v * 0.06 }, analyse: { calls: v, tokens: v * 20000, usd: v * 0.25 }, email: { calls: 1, tokens: 3000, usd: 0.01 } }, models: { "claude-sonnet-5-5": { usd: v * 0.07 }, "claude-opus-5-5": { usd: v * 0.25 } } } }); }
+  for (let i = 12; i >= 0; i--) { const v = (i * 7) % 5 + 1; days.push({ date: day(now - i * D), others: { fns: { stuartCoach: { calls: v * 6, errors: i === 0 ? 1 : 0 }, stuartAnalyse: { calls: v, errors: 0 } }, kinds: { coach: { calls: v * 6, tokens: v * 50000, usd: v * 0.06 }, analyse: { calls: v, tokens: v * 20000, usd: v * 0.25 }, email: { calls: 1, tokens: 3000, usd: 0.01 } }, models: { "claude-sonnet-5-5": { usd: v * 0.07, cacheRead: v * 30000, cacheWrite: v * 6000, inFresh: v * 9000 }, "claude-opus-5-5": { usd: v * 0.25, cacheRead: v * 8000, cacheWrite: v * 7000, inFresh: v * 5000 } } } }); }
   const a = (id, mask, j, s, o) => Object.assign({ id, mask, joined: now - j * D, seen: now - s * D, verified: true, consent: true, cv: true, jobs: 2, docs: 1, applied: 1, apps: 3, calls: 12, usd: 1.2, tokens: 90000, cap: 3.7, owner: false }, o);
   return { accounts: [a("u1", "s•••@mail.example", 4, 0, { calls: 41, usd: 3.05, jobs: 6, docs: 4, applied: 3 }), a("u2", "n•••@mail.example", 2, 0), a("u3", "a•••@mail.example", 6, 3, { docs: 0, applied: 0, calls: 5, usd: 0.3 }), a("u4", "r•••@mail.example", 1, 1, { verified: false, consent: false, cv: false, jobs: 0, docs: 0, applied: 0, apps: 0, calls: 0, usd: 0, tokens: 0 }), a("me", "m•••@mail.example", 30, 0, { owner: true, calls: 200, usd: 7.2 })], days, feedback7: 2, retention: { at: now - D / 2 } };
 }
@@ -27,8 +27,9 @@ export function model(data, ui, now) {
   const A = data.accounts.filter((a) => !(ui.leaveOut && a.owner)), span = ui.range || 90, list = dates(span, now), from = list[0];
   const buckets = (d) => (ui.leaveOut ? [d.others] : [d.others, d.owner]).filter(Boolean);
   const inRange = data.days.filter((d) => !ui.range || d.date >= from);
-  const kinds = {}, fns = {}; let tokTotal = 0;
+  const kinds = {}, fns = {}, cache = { read: 0, write: 0, fresh: 0 }; let tokTotal = 0;
   inRange.forEach((d) => buckets(d).forEach((b) => {
+    Object.values(b.models || {}).forEach((v) => { if (v.inFresh == null) return; cache.read += v.cacheRead || 0; cache.write += v.cacheWrite || 0; cache.fresh += v.inFresh || 0; }); // only days recorded since 2.50.5
     Object.entries(b.kinds || {}).forEach(([k, v]) => { const x = (kinds[k] = kinds[k] || { calls: 0, tokens: 0, usd: 0 }); x.calls += v.calls || 0; x.tokens += v.tokens || 0; x.usd += v.usd || 0; tokTotal += v.tokens || 0; });
     Object.entries(b.fns || {}).forEach(([k, v]) => { const x = (fns[k] = fns[k] || { calls: 0, errors: 0 }); x.calls += v.calls || 0; x.errors += v.errors || 0; });
   }));
@@ -46,10 +47,11 @@ export function model(data, ui, now) {
   const features = Object.entries(kinds).sort((a, b) => b[1].usd - a[1].usd).map(([k, v]) => { const L = KINDS[k] || [k, ""]; const f = fns[L[1]] || {}; return { key: k, name: L[0], fn: L[1], calls: v.calls, tokens: v.tokens, usd: v.usd, errors: f.errors || 0 }; });
   const accounts = A.slice().sort((a, b) => b.usd - a.usd || (b.joined || 0) - (a.joined || 0));
   const R = data.retention;
-  const health = [["Errors today", tErr + " of " + tCalls + " calls", tErr > 0], ["Accounts over 80% of their limit", String(near), near > 0], ["Failed sign-up emails today", String(mailErr), mailErr > 0], ["Notify me: voice, video", data.accounts.filter((x) => x.notify && x.notify.voice).length + ", " + data.accounts.filter((x) => x.notify && x.notify.video).length, false], ["Feedback, last 7 days", data.feedback7 + (data.feedback7 === 1 ? " message" : " messages"), data.feedback7 > 0], ["Daily retention job", R && R.at ? "Ran " + dayLabel(day(Number(R.at))) : "No run recorded yet", !(R && R.at)], ["Applications tracked", String(sum("apps")), false], ["Jobs checked", String(sum("jobs")), false]];
+  const health = [["Errors today", tErr + " of " + tCalls + " calls", tErr > 0], ["Accounts over 80% of their limit", String(near), near > 0], ["Failed sign-up emails today", String(mailErr), mailErr > 0], ["Notify me: voice, video", data.accounts.filter((x) => x.notify && x.notify.voice).length + ", " + data.accounts.filter((x) => x.notify && x.notify.video).length, false], ["Feedback, last 7 days", data.feedback7 + (data.feedback7 === 1 ? " message" : " messages"), data.feedback7 > 0], ["Daily retention job", R && R.at ? "Ran " + dayLabel(day(Number(R.at))) : "No run recorded yet", !(R && R.at)], ["Input read from cache", cacheLine(cache), false], ["Applications tracked", String(sum("apps")), false], ["Jobs checked", String(sum("jobs")), false]];
   const period = ui.range ? "Last " + ui.range + " days, " + longDate(from) + " to " + longDate(list[list.length - 1]) : "All time, since recording began (charts show the last 90 days)";
   return { A, list, kinds, fns, tokTotal, sum, active7, used, new7, su, co, daily, fun, near, features, accounts, health, period, calls: sum("calls"), usd: sum("usd") };
 }
+function cacheLine(c) { const all = c.read + c.write + c.fresh; if (!all) return "Nothing recorded yet"; return Math.round((c.read / all) * 100) + "% (" + toks(c.read) + " of " + toks(all) + " tokens)"; }
 function html() {
   const now = Date.now(), M = model(data, ui, now), A = M.A, list = M.list, sum = M.sum;
   const tile = (v, l, s) => `<div class="card ad-t"><b>${esc(v)}</b><span>${esc(l)}</span><i>${esc(s)}</i></div>`;
